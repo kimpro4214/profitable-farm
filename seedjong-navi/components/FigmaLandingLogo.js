@@ -1,0 +1,8 @@
+import { SvgXml } from "react-native-svg";
+
+// Exact SVG exported from Figma node 30:400.
+const landingLogoXml = `<svg preserveAspectRatio="none" overflow="visible" width="30.6568" height="9.65681" viewBox="0 0 30.6568 9.65681" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="Group 1"><circle id="Ellipse 1" cx="4.8284" cy="4.8284" r="4.8284" fill="#FF630F"/><circle id="Ellipse 2" cx="25.8284" cy="4.8284" r="4.3284" fill="#D9D9D9" stroke="#D9D9D9"/><line id="Line 1" x1="21" y1="5.5" x2="10" y2="5.5" stroke="#D9D9D9"/></g></svg>`;
+
+export default function FigmaLandingLogo() {
+  return <SvgXml xml={landingLogoXml} width={30.6568} height={9.65681} />;
+}

@@ -1,0 +1,8 @@
+import { SvgXml } from "react-native-svg";
+
+// Exact SVG exported from Figma node 102:576.
+const recommendLogoXml = `<svg preserveAspectRatio="none" overflow="visible" width="30.6568" height="9.65681" viewBox="0 0 30.6568 9.65681" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="Group 1"><circle id="Ellipse 1" cx="4.8284" cy="4.8284" r="4.8284" fill="#D9D9D9" stroke="#D9D9D9"/><circle id="Ellipse 2" cx="4.8284" cy="4.8284" r="4.3284" transform="matrix(-1 0 0 1 30.6568 0)" fill="#FF630F"/><line id="Line 1" x1="21" y1="5.5" x2="10" y2="5.5" stroke="#D9D9D9"/></g></svg>`;
+
+export default function FigmaRecommendLogo() {
+  return <SvgXml xml={recommendLogoXml} width={30.6568} height={9.65681} />;
+}

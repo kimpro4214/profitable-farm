@@ -1,0 +1,1591 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-31T18:31:20.019648+09:00",
+  "unit": "per 1000m2 (10a)",
+  "source": "농촌진흥청 농사로 농산물소득자료집",
+  "sourceUrl": "https://www.nongsaro.go.kr/portal/ps/psb/psbf/frmprdIncomeInfoNew.ps?menuId=PS03617",
+  "latestOfficialYear": 2024,
+  "estimateYear": 2025,
+  "metrics": {
+    "evaluation": "latest-year temporal holdout",
+    "yield": {
+      "trainRows": 191,
+      "testRows": 35,
+      "holdoutYear": 2024,
+      "mapePercent": 7.146,
+      "mae": 326.3,
+      "previousYearBaselineMapePercent": 8.659
+    },
+    "cost": {
+      "trainRows": 191,
+      "testRows": 35,
+      "holdoutYear": 2024,
+      "mapePercent": 9.884,
+      "mae": 527381.7,
+      "previousYearBaselineMapePercent": 7.663
+    },
+    "trainingRows": 231,
+    "cropCount": 61,
+    "yearRange": [
+      2019,
+      2024
+    ],
+    "books": [
+      {
+        "year": 2019,
+        "file": "2019_농산물소득자료집_전국.pdf",
+        "pages": 240,
+        "rows": 44
+      },
+      {
+        "year": 2020,
+        "file": "2020_농산물소득자료집_전국.pdf",
+        "pages": 240,
+        "rows": 44
+      },
+      {
+        "year": 2021,
+        "file": "2021_농산물소득자료집_전국.pdf",
+        "pages": 275,
+        "rows": 46
+      },
+      {
+        "year": 2022,
+        "file": "2022_농산물소득자료집_전국.pdf",
+        "pages": 277,
+        "rows": 48
+      },
+      {
+        "year": 2023,
+        "file": "2023_농산물소득자료집_전국.pdf",
+        "pages": 276,
+        "rows": 40
+      },
+      {
+        "year": 2024,
+        "file": "2024_농산물소득자료집_전국.pdf",
+        "pages": 287,
+        "rows": 51
+      }
+    ]
+  },
+  "deploymentPolicy": {
+    "yieldModelApplied": true,
+    "costModelApplied": false,
+    "gate": "model MAPE must be no worse than previous-year baseline on latest-year holdout"
+  },
+  "items": [
+    {
+      "crop": "가을배추",
+      "baseYear": 2019,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 5073,
+      "operatingCostWonPer1000m2": 1078868,
+      "officialLatest": {
+        "yieldKgPer1000m2": 5669,
+        "operatingCostWonPer1000m2": 1078868,
+        "incomeWonPer1000m2": 2055150,
+        "revenueWonPer1000m2": 3134018,
+        "farmgatePriceWonPerKg": 553.0
+      },
+      "historyYears": [
+        2019
+      ],
+      "confidencePercent": 17,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "가지",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 12891,
+      "operatingCostWonPer1000m2": 15183663,
+      "officialLatest": {
+        "yieldKgPer1000m2": 13114,
+        "operatingCostWonPer1000m2": 15183663,
+        "incomeWonPer1000m2": 15094181,
+        "revenueWonPer1000m2": 30277844,
+        "farmgatePriceWonPerKg": 2309.0
+      },
+      "historyYears": [
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "confidencePercent": 85,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "감귤",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 1937,
+      "operatingCostWonPer1000m2": 1670431,
+      "officialLatest": {
+        "yieldKgPer1000m2": 1747,
+        "operatingCostWonPer1000m2": 1670431,
+        "incomeWonPer1000m2": 2865794,
+        "revenueWonPer1000m2": 4536225,
+        "farmgatePriceWonPerKg": 2597.0
+      },
+      "historyYears": [
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "confidencePercent": 85,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "감자",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 2059,
+      "operatingCostWonPer1000m2": 1564381,
+      "officialLatest": {
+        "yieldKgPer1000m2": 2078,
+        "operatingCostWonPer1000m2": 1564381,
+        "incomeWonPer1000m2": 1097784,
+        "revenueWonPer1000m2": 2662164,
+        "farmgatePriceWonPerKg": 1289.5
+      },
+      "historyYears": [
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "confidencePercent": 85,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "고구마",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 1681,
+      "operatingCostWonPer1000m2": 1919252,
+      "officialLatest": {
+        "yieldKgPer1000m2": 1686,
+        "operatingCostWonPer1000m2": 1919252,
+        "incomeWonPer1000m2": 1710559,
+        "revenueWonPer1000m2": 3629811,
+        "farmgatePriceWonPerKg": 2094.0
+      },
+      "historyYears": [
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "confidencePercent": 85,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "고랭지무",
+      "baseYear": 2019,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 5694,
+      "operatingCostWonPer1000m2": 1272185,
+      "officialLatest": {
+        "yieldKgPer1000m2": 6556,
+        "operatingCostWonPer1000m2": 1272185,
+        "incomeWonPer1000m2": 1208071,
+        "revenueWonPer1000m2": 2480256,
+        "farmgatePriceWonPerKg": 378.0
+      },
+      "historyYears": [
+        2019
+      ],
+      "confidencePercent": 17,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "고랭지배추",
+      "baseYear": 2019,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 4854,
+      "operatingCostWonPer1000m2": 1322468,
+      "officialLatest": {
+        "yieldKgPer1000m2": 5356,
+        "operatingCostWonPer1000m2": 1322468,
+        "incomeWonPer1000m2": 781150,
+        "revenueWonPer1000m2": 2103618,
+        "farmgatePriceWonPerKg": 392.0
+      },
+      "historyYears": [
+        2019
+      ],
+      "confidencePercent": 17,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "고추",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 4755,
+      "operatingCostWonPer1000m2": 9764164,
+      "officialLatest": {
+        "yieldKgPer1000m2": 5028,
+        "operatingCostWonPer1000m2": 9764164,
+        "incomeWonPer1000m2": 12594942,
+        "revenueWonPer1000m2": 22359106,
+        "farmgatePriceWonPerKg": 4446.0
+      },
+      "historyYears": [
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "confidencePercent": 85,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "노지당근",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 3584,
+      "operatingCostWonPer1000m2": 2461740,
+      "officialLatest": {
+        "yieldKgPer1000m2": 3542,
+        "operatingCostWonPer1000m2": 2461740,
+        "incomeWonPer1000m2": 3813332,
+        "revenueWonPer1000m2": 6275072,
+        "farmgatePriceWonPerKg": 1772.0
+      },
+      "historyYears": [
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "confidencePercent": 85,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "노지생강",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 1822,
+      "operatingCostWonPer1000m2": 4301341,
+      "officialLatest": {
+        "yieldKgPer1000m2": 1873,
+        "operatingCostWonPer1000m2": 4301341,
+        "incomeWonPer1000m2": 4170854,
+        "revenueWonPer1000m2": 8472194,
+        "farmgatePriceWonPerKg": 4505.0
+      },
+      "historyYears": [
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "confidencePercent": 85,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "단감",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 1523,
+      "operatingCostWonPer1000m2": 1944421,
+      "officialLatest": {
+        "yieldKgPer1000m2": 1537,
+        "operatingCostWonPer1000m2": 1944421,
+        "incomeWonPer1000m2": 2058061,
+        "revenueWonPer1000m2": 4002483,
+        "farmgatePriceWonPerKg": 2604.0
+      },
+      "historyYears": [
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "confidencePercent": 85,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "당근",
+      "baseYear": 2019,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 4069,
+      "operatingCostWonPer1000m2": 2126669,
+      "officialLatest": {
+        "yieldKgPer1000m2": 4234,
+        "operatingCostWonPer1000m2": 2126669,
+        "incomeWonPer1000m2": 1410771,
+        "revenueWonPer1000m2": 3537440,
+        "farmgatePriceWonPerKg": 835.0
+      },
+      "historyYears": [
+        2019
+      ],
+      "confidencePercent": 17,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "대파",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 3791,
+      "operatingCostWonPer1000m2": 1915197,
+      "officialLatest": {
+        "yieldKgPer1000m2": 3821,
+        "operatingCostWonPer1000m2": 1915197,
+        "incomeWonPer1000m2": 2654782,
+        "revenueWonPer1000m2": 4569980,
+        "farmgatePriceWonPerKg": 1196.0
+      },
+      "historyYears": [
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "confidencePercent": 85,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "들깨",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 86,
+      "operatingCostWonPer1000m2": 497644,
+      "officialLatest": {
+        "yieldKgPer1000m2": 86,
+        "operatingCostWonPer1000m2": 497644,
+        "incomeWonPer1000m2": 596862,
+        "revenueWonPer1000m2": 1094506,
+        "farmgatePriceWonPerKg": 12707.0
+      },
+      "historyYears": [
+        2022,
+        2023,
+        2024
+      ],
+      "confidencePercent": 51,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "딸기",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 3173,
+      "operatingCostWonPer1000m2": 18201903,
+      "officialLatest": {
+        "yieldKgPer1000m2": 3092,
+        "operatingCostWonPer1000m2": 18201903,
+        "incomeWonPer1000m2": 12842494,
+        "revenueWonPer1000m2": 31044398,
+        "farmgatePriceWonPerKg": 9981.0
+      },
+      "historyYears": [
+        2020,
+        2021,
+        2022,
+        2024
+      ],
+      "confidencePercent": 68,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "딸기(촉성)",
+      "baseYear": 2019,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 3516,
+      "operatingCostWonPer1000m2": 12744633,
+      "officialLatest": {
+        "yieldKgPer1000m2": 3445,
+        "operatingCostWonPer1000m2": 12744633,
+        "incomeWonPer1000m2": 9510261,
+        "revenueWonPer1000m2": 22254894,
+        "farmgatePriceWonPerKg": 6444.0
+      },
+      "historyYears": [
+        2019
+      ],
+      "confidencePercent": 17,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "무",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 5797,
+      "operatingCostWonPer1000m2": 1548406,
+      "officialLatest": {
+        "yieldKgPer1000m2": 6209,
+        "operatingCostWonPer1000m2": 1548406,
+        "incomeWonPer1000m2": 1753116,
+        "revenueWonPer1000m2": 3301521,
+        "farmgatePriceWonPerKg": 532.5
+      },
+      "historyYears": [
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "confidencePercent": 85,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "밀",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 453,
+      "operatingCostWonPer1000m2": 314758,
+      "officialLatest": {
+        "yieldKgPer1000m2": 394,
+        "operatingCostWonPer1000m2": 314758,
+        "incomeWonPer1000m2": 50148,
+        "revenueWonPer1000m2": 364906,
+        "farmgatePriceWonPerKg": 925.0
+      },
+      "historyYears": [
+        2024
+      ],
+      "confidencePercent": 17,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "방울토마토",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 4980,
+      "operatingCostWonPer1000m2": 13172796,
+      "officialLatest": {
+        "yieldKgPer1000m2": 5532,
+        "operatingCostWonPer1000m2": 13172796,
+        "incomeWonPer1000m2": 11386335,
+        "revenueWonPer1000m2": 24559131,
+        "farmgatePriceWonPerKg": 4487.5
+      },
+      "historyYears": [
+        2019,
+        2020,
+        2021,
+        2022,
+        2024
+      ],
+      "confidencePercent": 85,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "배",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 2619,
+      "operatingCostWonPer1000m2": 3859722,
+      "officialLatest": {
+        "yieldKgPer1000m2": 2620,
+        "operatingCostWonPer1000m2": 3859722,
+        "incomeWonPer1000m2": 4318622,
+        "revenueWonPer1000m2": 8178345,
+        "farmgatePriceWonPerKg": 3122.0
+      },
+      "historyYears": [
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "confidencePercent": 85,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "배추",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 5625,
+      "operatingCostWonPer1000m2": 1533753,
+      "officialLatest": {
+        "yieldKgPer1000m2": 6155,
+        "operatingCostWonPer1000m2": 1533753,
+        "incomeWonPer1000m2": 1213278,
+        "revenueWonPer1000m2": 2754908,
+        "farmgatePriceWonPerKg": 566.0
+      },
+      "historyYears": [
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "confidencePercent": 85,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "보리",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 398,
+      "operatingCostWonPer1000m2": 347298,
+      "officialLatest": {
+        "yieldKgPer1000m2": 379,
+        "operatingCostWonPer1000m2": 347298,
+        "incomeWonPer1000m2": 99675,
+        "revenueWonPer1000m2": 446972,
+        "farmgatePriceWonPerKg": 1191.0
+      },
+      "historyYears": [
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "confidencePercent": 85,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "복숭아",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 1119,
+      "operatingCostWonPer1000m2": 2698074,
+      "officialLatest": {
+        "yieldKgPer1000m2": 1126,
+        "operatingCostWonPer1000m2": 2698074,
+        "incomeWonPer1000m2": 2540889,
+        "revenueWonPer1000m2": 5238963,
+        "farmgatePriceWonPerKg": 4652.0
+      },
+      "historyYears": [
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "confidencePercent": 85,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "봄배추",
+      "baseYear": 2019,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 6227,
+      "operatingCostWonPer1000m2": 1053380,
+      "officialLatest": {
+        "yieldKgPer1000m2": 7318,
+        "operatingCostWonPer1000m2": 1053380,
+        "incomeWonPer1000m2": 753914,
+        "revenueWonPer1000m2": 1807294,
+        "farmgatePriceWonPerKg": 247.0
+      },
+      "historyYears": [
+        2019
+      ],
+      "confidencePercent": 17,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "블루베리",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 484,
+      "operatingCostWonPer1000m2": 5179707,
+      "officialLatest": {
+        "yieldKgPer1000m2": 491,
+        "operatingCostWonPer1000m2": 5179707,
+        "incomeWonPer1000m2": 6459798,
+        "revenueWonPer1000m2": 11639504,
+        "farmgatePriceWonPerKg": 23651.0
+      },
+      "historyYears": [
+        2022,
+        2023,
+        2024
+      ],
+      "confidencePercent": 51,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "사과",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 2018,
+      "operatingCostWonPer1000m2": 3706022,
+      "officialLatest": {
+        "yieldKgPer1000m2": 1982,
+        "operatingCostWonPer1000m2": 3706022,
+        "incomeWonPer1000m2": 5114297,
+        "revenueWonPer1000m2": 8820320,
+        "farmgatePriceWonPerKg": 4449.0
+      },
+      "historyYears": [
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "confidencePercent": 85,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "상추",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 3320,
+      "operatingCostWonPer1000m2": 6608669,
+      "officialLatest": {
+        "yieldKgPer1000m2": 3315,
+        "operatingCostWonPer1000m2": 6608669,
+        "incomeWonPer1000m2": 5020401,
+        "revenueWonPer1000m2": 11629071,
+        "farmgatePriceWonPerKg": 3508.0
+      },
+      "historyYears": [
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "confidencePercent": 85,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "생강",
+      "baseYear": 2019,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 1632,
+      "operatingCostWonPer1000m2": 3092973,
+      "officialLatest": {
+        "yieldKgPer1000m2": 1419,
+        "operatingCostWonPer1000m2": 3092973,
+        "incomeWonPer1000m2": 4131588,
+        "revenueWonPer1000m2": 7224562,
+        "farmgatePriceWonPerKg": 5079.0
+      },
+      "historyYears": [
+        2019
+      ],
+      "confidencePercent": 17,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "수박",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 4242,
+      "operatingCostWonPer1000m2": 2942471,
+      "officialLatest": {
+        "yieldKgPer1000m2": 4462,
+        "operatingCostWonPer1000m2": 2942471,
+        "incomeWonPer1000m2": 3080548,
+        "revenueWonPer1000m2": 6023020,
+        "farmgatePriceWonPerKg": 1351.0
+      },
+      "historyYears": [
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "confidencePercent": 85,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "수박(반촉성)",
+      "baseYear": 2019,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 4376,
+      "operatingCostWonPer1000m2": 2469271,
+      "officialLatest": {
+        "yieldKgPer1000m2": 4673,
+        "operatingCostWonPer1000m2": 2469271,
+        "incomeWonPer1000m2": 3048274,
+        "revenueWonPer1000m2": 5517545,
+        "farmgatePriceWonPerKg": 1181.0
+      },
+      "historyYears": [
+        2019
+      ],
+      "confidencePercent": 17,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "시금치",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 1254,
+      "operatingCostWonPer1000m2": 1706770,
+      "officialLatest": {
+        "yieldKgPer1000m2": 1253,
+        "operatingCostWonPer1000m2": 1706770,
+        "incomeWonPer1000m2": 2758104,
+        "revenueWonPer1000m2": 4464874,
+        "farmgatePriceWonPerKg": 3617.5
+      },
+      "historyYears": [
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "confidencePercent": 85,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "시설멜론",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 2991,
+      "operatingCostWonPer1000m2": 5861347,
+      "officialLatest": {
+        "yieldKgPer1000m2": 2695,
+        "operatingCostWonPer1000m2": 5861347,
+        "incomeWonPer1000m2": 4530513,
+        "revenueWonPer1000m2": 10391860,
+        "farmgatePriceWonPerKg": 3856.0
+      },
+      "historyYears": [
+        2024
+      ],
+      "confidencePercent": 17,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "시설부추",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 3797,
+      "operatingCostWonPer1000m2": 7042152,
+      "officialLatest": {
+        "yieldKgPer1000m2": 3846,
+        "operatingCostWonPer1000m2": 7042152,
+        "incomeWonPer1000m2": 5248793,
+        "revenueWonPer1000m2": 12290946,
+        "farmgatePriceWonPerKg": 3196.0
+      },
+      "historyYears": [
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "confidencePercent": 85,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "시설수박(반촉성)",
+      "baseYear": 2022,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 4394,
+      "operatingCostWonPer1000m2": 3128270,
+      "officialLatest": {
+        "yieldKgPer1000m2": 4697,
+        "operatingCostWonPer1000m2": 3128270,
+        "incomeWonPer1000m2": 4048170,
+        "revenueWonPer1000m2": 7176440,
+        "farmgatePriceWonPerKg": 1528.0
+      },
+      "historyYears": [
+        2020,
+        2021,
+        2022
+      ],
+      "confidencePercent": 51,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "시설오이(반촉성)",
+      "baseYear": 2022,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 8538,
+      "operatingCostWonPer1000m2": 6803524,
+      "officialLatest": {
+        "yieldKgPer1000m2": 8411,
+        "operatingCostWonPer1000m2": 6803524,
+        "incomeWonPer1000m2": 8241763,
+        "revenueWonPer1000m2": 15045287,
+        "farmgatePriceWonPerKg": 1789.0
+      },
+      "historyYears": [
+        2020,
+        2021,
+        2022
+      ],
+      "confidencePercent": 51,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "시설오이(억제)",
+      "baseYear": 2022,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 4788,
+      "operatingCostWonPer1000m2": 5364571,
+      "officialLatest": {
+        "yieldKgPer1000m2": 5262,
+        "operatingCostWonPer1000m2": 5364571,
+        "incomeWonPer1000m2": 3657823,
+        "revenueWonPer1000m2": 9022394,
+        "farmgatePriceWonPerKg": 1709.0
+      },
+      "historyYears": [
+        2020,
+        2021,
+        2022
+      ],
+      "confidencePercent": 51,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "시설오이(촉성)",
+      "baseYear": 2022,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 15815,
+      "operatingCostWonPer1000m2": 19326582,
+      "officialLatest": {
+        "yieldKgPer1000m2": 15989,
+        "operatingCostWonPer1000m2": 19326582,
+        "incomeWonPer1000m2": 18028647,
+        "revenueWonPer1000m2": 37355230,
+        "farmgatePriceWonPerKg": 2336.0
+      },
+      "historyYears": [
+        2021,
+        2022
+      ],
+      "confidencePercent": 34,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "시설장미",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 66536,
+      "operatingCostWonPer1000m2": 23418501,
+      "officialLatest": {
+        "yieldKgPer1000m2": 65840,
+        "operatingCostWonPer1000m2": 23418501,
+        "incomeWonPer1000m2": 13838797,
+        "revenueWonPer1000m2": 37257298,
+        "farmgatePriceWonPerKg": 566.0
+      },
+      "historyYears": [
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "confidencePercent": 85,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "시설착색단고추(파프리카)",
+      "baseYear": 2021,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 10774,
+      "operatingCostWonPer1000m2": 26250421,
+      "officialLatest": {
+        "yieldKgPer1000m2": 12675,
+        "operatingCostWonPer1000m2": 26250421,
+        "incomeWonPer1000m2": 10738721,
+        "revenueWonPer1000m2": 36989142,
+        "farmgatePriceWonPerKg": 2918.0
+      },
+      "historyYears": [
+        2021
+      ],
+      "confidencePercent": 17,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "시설참외",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 3946,
+      "operatingCostWonPer1000m2": 6171572,
+      "officialLatest": {
+        "yieldKgPer1000m2": 4053,
+        "operatingCostWonPer1000m2": 6171572,
+        "incomeWonPer1000m2": 7022018,
+        "revenueWonPer1000m2": 13193589,
+        "farmgatePriceWonPerKg": 3255.0
+      },
+      "historyYears": [
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "confidencePercent": 85,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "시설토마토(반촉성)",
+      "baseYear": 2022,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 7083,
+      "operatingCostWonPer1000m2": 10618552,
+      "officialLatest": {
+        "yieldKgPer1000m2": 7866,
+        "operatingCostWonPer1000m2": 10618552,
+        "incomeWonPer1000m2": 9576176,
+        "revenueWonPer1000m2": 20194728,
+        "farmgatePriceWonPerKg": 2567.0
+      },
+      "historyYears": [
+        2020,
+        2021,
+        2022
+      ],
+      "confidencePercent": 51,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "시설토마토(촉성)",
+      "baseYear": 2022,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 11119,
+      "operatingCostWonPer1000m2": 15987863,
+      "officialLatest": {
+        "yieldKgPer1000m2": 11021,
+        "operatingCostWonPer1000m2": 15987863,
+        "incomeWonPer1000m2": 11228693,
+        "revenueWonPer1000m2": 27216556,
+        "farmgatePriceWonPerKg": 2469.0
+      },
+      "historyYears": [
+        2020,
+        2021,
+        2022
+      ],
+      "confidencePercent": 51,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "애호박",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 8593,
+      "operatingCostWonPer1000m2": 7842191,
+      "officialLatest": {
+        "yieldKgPer1000m2": 8700,
+        "operatingCostWonPer1000m2": 7842191,
+        "incomeWonPer1000m2": 10791514,
+        "revenueWonPer1000m2": 18633705,
+        "farmgatePriceWonPerKg": 2142.0
+      },
+      "historyYears": [
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "confidencePercent": 85,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "양배추",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 5705,
+      "operatingCostWonPer1000m2": 1359926,
+      "officialLatest": {
+        "yieldKgPer1000m2": 6174,
+        "operatingCostWonPer1000m2": 1359926,
+        "incomeWonPer1000m2": 1139035,
+        "revenueWonPer1000m2": 2498961,
+        "farmgatePriceWonPerKg": 405.0
+      },
+      "historyYears": [
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "confidencePercent": 85,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "오미자",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 394,
+      "operatingCostWonPer1000m2": 1811618,
+      "officialLatest": {
+        "yieldKgPer1000m2": 395,
+        "operatingCostWonPer1000m2": 1811618,
+        "incomeWonPer1000m2": 2776989,
+        "revenueWonPer1000m2": 4588608,
+        "farmgatePriceWonPerKg": 11629.0
+      },
+      "historyYears": [
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "confidencePercent": 85,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "오이",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 8929,
+      "operatingCostWonPer1000m2": 12299942,
+      "officialLatest": {
+        "yieldKgPer1000m2": 10505,
+        "operatingCostWonPer1000m2": 12299942,
+        "incomeWonPer1000m2": 12883641,
+        "revenueWonPer1000m2": 25183583,
+        "farmgatePriceWonPerKg": 2397.0
+      },
+      "historyYears": [
+        2024
+      ],
+      "confidencePercent": 17,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "오이(반촉성)",
+      "baseYear": 2019,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 8860,
+      "operatingCostWonPer1000m2": 6422297,
+      "officialLatest": {
+        "yieldKgPer1000m2": 10424,
+        "operatingCostWonPer1000m2": 6422297,
+        "incomeWonPer1000m2": 6274428,
+        "revenueWonPer1000m2": 12696725,
+        "farmgatePriceWonPerKg": 1218.0
+      },
+      "historyYears": [
+        2019
+      ],
+      "confidencePercent": 17,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "오이(억제)",
+      "baseYear": 2019,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 4594,
+      "operatingCostWonPer1000m2": 4065662,
+      "officialLatest": {
+        "yieldKgPer1000m2": 4984,
+        "operatingCostWonPer1000m2": 4065662,
+        "incomeWonPer1000m2": 3264096,
+        "revenueWonPer1000m2": 7329758,
+        "farmgatePriceWonPerKg": 1471.0
+      },
+      "historyYears": [
+        2019
+      ],
+      "confidencePercent": 17,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "오이(촉성)",
+      "baseYear": 2019,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 13284,
+      "operatingCostWonPer1000m2": 15014789,
+      "officialLatest": {
+        "yieldKgPer1000m2": 15628,
+        "operatingCostWonPer1000m2": 15014789,
+        "incomeWonPer1000m2": 12134508,
+        "revenueWonPer1000m2": 27149297,
+        "farmgatePriceWonPerKg": 1736.0
+      },
+      "historyYears": [
+        2019
+      ],
+      "confidencePercent": 17,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "옥수수(사료용)",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 2820,
+      "operatingCostWonPer1000m2": 852631,
+      "officialLatest": {
+        "yieldKgPer1000m2": 2796,
+        "operatingCostWonPer1000m2": 852631,
+        "incomeWonPer1000m2": 1135449,
+        "revenueWonPer1000m2": 1988080,
+        "farmgatePriceWonPerKg": 709.0
+      },
+      "historyYears": [
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "confidencePercent": 85,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "인삼(4년근)",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 662,
+      "operatingCostWonPer1000m2": 8926853,
+      "officialLatest": {
+        "yieldKgPer1000m2": 651,
+        "operatingCostWonPer1000m2": 8926853,
+        "incomeWonPer1000m2": 5634777,
+        "revenueWonPer1000m2": 14561630,
+        "farmgatePriceWonPerKg": 22360.0
+      },
+      "historyYears": [
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "confidencePercent": 85,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "자두",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 1242,
+      "operatingCostWonPer1000m2": 2030414,
+      "officialLatest": {
+        "yieldKgPer1000m2": 1080,
+        "operatingCostWonPer1000m2": 2030414,
+        "incomeWonPer1000m2": 2302405,
+        "revenueWonPer1000m2": 4332818,
+        "farmgatePriceWonPerKg": 4012.0
+      },
+      "historyYears": [
+        2024
+      ],
+      "confidencePercent": 17,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "쪽파",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 1636,
+      "operatingCostWonPer1000m2": 2791661,
+      "officialLatest": {
+        "yieldKgPer1000m2": 1614,
+        "operatingCostWonPer1000m2": 2791661,
+        "incomeWonPer1000m2": 3081534,
+        "revenueWonPer1000m2": 5873196,
+        "farmgatePriceWonPerKg": 3638.0
+      },
+      "historyYears": [
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "confidencePercent": 85,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "착색단고추(파프리카)",
+      "baseYear": 2020,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 12510,
+      "operatingCostWonPer1000m2": 28473446,
+      "officialLatest": {
+        "yieldKgPer1000m2": 12453,
+        "operatingCostWonPer1000m2": 28473446,
+        "incomeWonPer1000m2": 6793445,
+        "revenueWonPer1000m2": 35266891,
+        "farmgatePriceWonPerKg": 2832.0
+      },
+      "historyYears": [
+        2019,
+        2020
+      ],
+      "confidencePercent": 34,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "참깨",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 70,
+      "operatingCostWonPer1000m2": 770302,
+      "officialLatest": {
+        "yieldKgPer1000m2": 71,
+        "operatingCostWonPer1000m2": 770302,
+        "incomeWonPer1000m2": 1045564,
+        "revenueWonPer1000m2": 1815866,
+        "farmgatePriceWonPerKg": 25580.0
+      },
+      "historyYears": [
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "confidencePercent": 85,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "키위",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 1507,
+      "operatingCostWonPer1000m2": 2979213,
+      "officialLatest": {
+        "yieldKgPer1000m2": 1532,
+        "operatingCostWonPer1000m2": 2979213,
+        "incomeWonPer1000m2": 3489828,
+        "revenueWonPer1000m2": 6469041,
+        "farmgatePriceWonPerKg": 4149.0
+      },
+      "historyYears": [
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "confidencePercent": 85,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "토마토",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 8728,
+      "operatingCostWonPer1000m2": 17068938,
+      "officialLatest": {
+        "yieldKgPer1000m2": 10268,
+        "operatingCostWonPer1000m2": 17068938,
+        "incomeWonPer1000m2": 14193179,
+        "revenueWonPer1000m2": 31262118,
+        "farmgatePriceWonPerKg": 3115.0
+      },
+      "historyYears": [
+        2024
+      ],
+      "confidencePercent": 17,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "토마토(반촉성)",
+      "baseYear": 2019,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 6518,
+      "operatingCostWonPer1000m2": 8675045,
+      "officialLatest": {
+        "yieldKgPer1000m2": 7668,
+        "operatingCostWonPer1000m2": 8675045,
+        "incomeWonPer1000m2": 7253739,
+        "revenueWonPer1000m2": 15928784,
+        "farmgatePriceWonPerKg": 2042.0
+      },
+      "historyYears": [
+        2019
+      ],
+      "confidencePercent": 17,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "토마토(촉성)",
+      "baseYear": 2019,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 10093,
+      "operatingCostWonPer1000m2": 15536842,
+      "officialLatest": {
+        "yieldKgPer1000m2": 11874,
+        "operatingCostWonPer1000m2": 15536842,
+        "incomeWonPer1000m2": 9746631,
+        "revenueWonPer1000m2": 25283473,
+        "farmgatePriceWonPerKg": 2126.0
+      },
+      "historyYears": [
+        2019
+      ],
+      "confidencePercent": 17,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "파프리카",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 11550,
+      "operatingCostWonPer1000m2": 29377408,
+      "officialLatest": {
+        "yieldKgPer1000m2": 11349,
+        "operatingCostWonPer1000m2": 29377408,
+        "incomeWonPer1000m2": 11940800,
+        "revenueWonPer1000m2": 41318208,
+        "farmgatePriceWonPerKg": 3641.0
+      },
+      "historyYears": [
+        2022,
+        2023,
+        2024
+      ],
+      "confidencePercent": 51,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    },
+    {
+      "crop": "포도",
+      "baseYear": 2024,
+      "estimateYear": 2025,
+      "yieldKgPer1000m2": 1609,
+      "operatingCostWonPer1000m2": 5200290,
+      "officialLatest": {
+        "yieldKgPer1000m2": 1624,
+        "operatingCostWonPer1000m2": 5200290,
+        "incomeWonPer1000m2": 6263771,
+        "revenueWonPer1000m2": 11464062,
+        "farmgatePriceWonPerKg": 7078.0
+      },
+      "historyYears": [
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "confidencePercent": 85,
+      "method": {
+        "yield": "RDA latest 70% + temporal ExtraTrees estimate 30% (bounded to ±15% of official)",
+        "cost": "RDA latest official value (model rejected by holdout gate)"
+      }
+    }
+  ]
+}
