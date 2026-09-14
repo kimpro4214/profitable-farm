@@ -1,48 +1,64 @@
-# seedjong-navi
+# 수익농가 앱
 
-Expo Router 기반 수익팜 모바일·웹 앱입니다.
+Expo Router 기반의 수익농가 클라이언트입니다. Supabase 인증·DB·Storage·Edge Functions와 연동하며, 웹과 Android에서 실행할 수 있습니다.
 
-## 로컬 실행
+상위 프로젝트 안내는 [루트 README](../README.md)를 참고하세요.
+
+## 실행
 
 ```powershell
 npm install
 npx expo start --web
 ```
 
-웹에서는 최대 폭 360px의 휴대폰 프레임으로 표시됩니다. 네이티브 시뮬레이터는 `npx expo run:android` 또는 Android Studio의 가상 기기를 사용할 수 있습니다.
+```powershell
+npx expo start --android
+```
 
-## Supabase 적용
-
-1. Supabase SQL Editor에서 `supabase/schema.sql`을 실행합니다.
-2. Edge Functions를 배포합니다.
+검증 및 웹 번들은 다음과 같습니다.
 
 ```powershell
+npm run check
+npm run build:web
+```
+
+## 환경 변수
+
+`.env.example`을 `.env`로 복사해 공개 클라이언트 값만 설정합니다.
+
+```text
+EXPO_PUBLIC_SUPABASE_URL=
+EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+EXPO_PUBLIC_GOOGLE_MAPS_API_KEY= # Android 지도 사용 시
+```
+
+서버 비밀 값(Gemini API 키, Supabase service role 키, Kakao client secret, 동기화·가져오기 비밀 값)은 `.env`에 넣지 않고 Supabase Edge Function secrets에 등록합니다.
+
+## Supabase 배포
+
+```powershell
+npx supabase link --project-ref <project-ref>
+npx supabase db push
+npx supabase functions deploy analyze-farm
 npx supabase functions deploy ask-rag
+npx supabase functions deploy import-farm-reference
+npx supabase functions deploy kakao-oidc --no-verify-jwt
 npx supabase functions deploy sync-weekly-farming --no-verify-jwt
 ```
 
-3. 서버 전용 비밀값을 등록합니다. 이 값들은 앱 `.env`에 넣지 않습니다.
+제공되는 Edge Functions:
 
-```powershell
-npx supabase secrets set GEMINI_API_KEY=... SYNC_WEEKLY_SECRET=...
-```
+- `analyze-farm`: 농지 조건 분석
+- `ask-rag`: Gemini 기반 RAG 챗봇
+- `import-farm-reference`: 참조 데이터 가져오기
+- `kakao-oidc`: Kakao 소셜 로그인 중계
+- `sync-weekly-farming`: 주간 영농 정보 동기화
 
-4. 최초 동기화는 다음처럼 호출합니다.
+Google/Kakao Provider 및 Redirect URL은 Supabase Dashboard에서 설정합니다.
 
-```powershell
-Invoke-RestMethod -Method Post `
-  -Uri "https://<project-ref>.supabase.co/functions/v1/sync-weekly-farming" `
-  -Headers @{ "x-sync-secret" = "<SYNC_WEEKLY_SECRET>" }
-```
+- 앱 콜백: `seedjongnavi://auth/callback`
+- 웹 콜백: `https://<your-domain>/auth/callback`
 
-Supabase Dashboard의 Cron에서 매주 같은 함수 URL을 POST 호출하고 `x-sync-secret` 헤더를 추가하면 최신 농촌진흥청 주간농사정보 PDF를 수집해 Gemini로 요약합니다.
+## 웹 배포
 
-## Google·카카오 로그인
-
-Supabase Dashboard의 Authentication > Providers에서 Google과 Kakao를 활성화하고 각 공급자의 Client ID/Secret을 등록합니다. URL Configuration의 Redirect URLs에는 아래 주소를 허용합니다.
-
-- 네이티브 빌드: `seedjongnavi://auth/callback`
-- 웹 배포: `https://<웹 도메인>/auth/callback`
-- Expo 개발: 실행 로그에 표시되는 `exp://.../--/auth/callback`
-
-앱 공개 환경변수는 `.env.example`을 복사해 `.env`에 설정합니다. `.env`는 Git에서 제외됩니다.
+Vercel 또는 EAS Hosting에 배포할 수 있습니다. Vercel 사용 시 이 폴더를 Root Directory로 지정하고, `EXPO_PUBLIC_SUPABASE_URL`과 `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`만 클라이언트 환경 변수로 등록합니다. 운영 배포 절차는 [WEB_DEMO.md](WEB_DEMO.md)에 있습니다.
