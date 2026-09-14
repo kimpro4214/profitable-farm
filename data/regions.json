@@ -1,0 +1,85 @@
+{
+  "_note": "아래 site 값은 흙토람/농업기상정보서비스/KRC 공공데이터 등에서 개발자가 직접 조회해 채워 넣을 자리입니다. 지금은 서면심사 데모용 임시 mock 값이며, source_note에 실제 조회 시 출처/조회일을 남겨 추적할 수 있게 합니다.",
+  "regions": [
+    {
+      "id": "region_01",
+      "name": "전북 김제시 광활면 (간척지)",
+      "site": {
+        "droughtRisk": 35,
+        "reservoirLevel": 70,
+        "salinityEC": 3.2,
+        "groundwaterStability": 45,
+        "soilPh": 7.4,
+        "frostRisk": 15,
+        "climateZone": "temperate",
+        "zoneType": "jinheung",
+        "recentCropHistory": []
+      },
+      "source_note": "mock 값 (임시) — 흙토람/농업기상정보서비스 실제 조회 전, 2026-07-29 자리표시용"
+    },
+    {
+      "id": "region_02",
+      "name": "전남 해남군 산이면 (간척지)",
+      "site": {
+        "droughtRisk": 30,
+        "reservoirLevel": 65,
+        "salinityEC": 4.1,
+        "groundwaterStability": 40,
+        "soilPh": 7.6,
+        "frostRisk": 5,
+        "climateZone": "warm",
+        "zoneType": "general",
+        "recentCropHistory": [{ "crop": "양파", "pestIssue": true }]
+      },
+      "source_note": "mock 값 (임시) — 흙토람/농업기상정보서비스 실제 조회 전, 2026-07-29 자리표시용"
+    },
+    {
+      "id": "region_03",
+      "name": "강원 평창군 대관령면 (고랭지)",
+      "site": {
+        "droughtRisk": 20,
+        "reservoirLevel": 55,
+        "salinityEC": 0.6,
+        "groundwaterStability": 70,
+        "soilPh": 5.8,
+        "frostRisk": 75,
+        "climateZone": "cool",
+        "zoneType": "boho",
+        "recentCropHistory": []
+      },
+      "source_note": "mock 값 (임시) — 흙토람/농업기상정보서비스 실제 조회 전, 2026-07-29 자리표시용"
+    },
+    {
+      "id": "region_04",
+      "name": "경북 상주시 공검면 (준평야지)",
+      "site": {
+        "droughtRisk": 55,
+        "reservoirLevel": 40,
+        "salinityEC": 0.9,
+        "groundwaterStability": 60,
+        "soilPh": 6.2,
+        "frostRisk": 30,
+        "climateZone": "temperate",
+        "zoneType": "general",
+        "recentCropHistory": [{ "crop": "고추", "pestIssue": true }]
+      },
+      "source_note": "mock 값 (임시) — 흙토람/농업기상정보서비스 실제 조회 전, 2026-07-29 자리표시용"
+    },
+    {
+      "id": "region_05",
+      "name": "충남 서산시 인지면 (해안 간척지)",
+      "site": {
+        "droughtRisk": 45,
+        "reservoirLevel": 50,
+        "salinityEC": 2.4,
+        "groundwaterStability": 35,
+        "soilPh": 6.9,
+        "frostRisk": 20,
+        "climateZone": "warm",
+        "zoneType": "boho",
+        "recentCropHistory": []
+      },
+      "source_note": "mock 값 (임시) — 흙토람/농업기상정보서비스 실제 조회 전, 2026-07-29 자리표시용"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "name": "seedjong-navi",
+  "version": "0.1.0",
+  "description": "파종내비 — 농지 조건 기반 작물 추천 MVP (정적 웹, 백엔드 없음)",
+  "private": true,
+  "scripts": {
+    "start": "http-server -c-1 -o -p 8080"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}

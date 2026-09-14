@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>파종내비 — 농지 조건 입력</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🌾 파종내비 — 농지 조건 기반 작물 추천 <span class="badge">DEMO</span></h1>
+    <p>가뭄·저수지수위·염도·지하수·농업진흥지역(KRC 공공데이터) + 기온·토양·병해충(외부기관) 8개 지표 기반 조건식 매칭 로직 데모</p>
+  </header>
+
+  <div class="card">
+    <h2>지역 선택</h2>
+    <div class="field">
+      <select id="regionSelect">
+        <option value="">— 지역을 선택하세요 —</option>
+      </select>
+    </div>
+
+    <div id="indicatorBox" style="display:none;">
+      <div class="indicator-grid">
+        <div class="item">가뭄 위험도<span id="d-drought"></span></div>
+        <div class="item">저수지 저수율(%)<span id="d-reservoir"></span></div>
+        <div class="item">염도 EC(dS/m)<span id="d-salinity"></span></div>
+        <div class="item">지하수 관개 안정성<span id="d-gw"></span></div>
+        <div class="item">토양 pH<span id="d-ph"></span></div>
+        <div class="item">서리 위험도<span id="d-frost"></span></div>
+        <div class="item">기후대<span id="d-climate"></span></div>
+        <div class="item">농지 용도구역<span id="d-zone"></span></div>
+      </div>
+      <div class="field" style="margin-top:14px;">
+        <label>최근 병해충 발생 이력 (선택 가능)</label>
+        <select id="pestCrop">
+          <option value="">— 없음 —</option>
+          <option value="배추">배추(십자화과)</option>
+          <option value="고추">고추(가지과)</option>
+          <option value="감자">감자(가지과)</option>
+          <option value="양파">양파(백합과)</option>
+        </select>
+      </div>
+      <div class="source-note" id="regionSourceNote"></div>
+    </div>
+    <p class="empty-hint" id="emptyHint">지역을 선택하면 7개 지표 값이 자동으로 표시됩니다 (직접 수정은 지원하지 않으며, 지역 데이터 기준으로 고정됩니다). 병해충 이력은 직접 선택할 수 있습니다.</p>
+  </div>
+
+  <div class="card">
+    <h2>재배 면적(㎡)</h2>
+    <div class="field">
+      <input type="number" id="area" value="1000" min="100" step="100">
+    </div>
+    <button class="run" id="runBtn" disabled>추천 실행 →</button>
+  </div>
+</div>
+
+<script src="crop_matcher.js"></script>
+<script>
+  const STORAGE_KEY = "seedjongNaviState";
+  let REGIONS = [];
+  let selectedRegion = null;
+
+  async function loadRegions() {
+    try {
+      const res = await fetch("data/regions.json");
+      const data = await res.json();
+      REGIONS = data.regions || [];
+    } catch (e) {
+      console.error("regions.json 로드 실패:", e);
+      REGIONS = [];
+    }
+    const select = document.getElementById("regionSelect");
+    REGIONS.forEach((r) => {
+      const opt = document.createElement("option");
+      opt.value = r.id;
+      opt.textContent = r.name;
+      select.appendChild(opt);
+    });
+
+    const saved = readSavedState();
+    if (saved && saved.regionId) {
+      select.value = saved.regionId;
+      showRegion(saved.regionId);
+      document.getElementById("area").value = saved.area;
+      document.getElementById("pestCrop").value = saved.pestCrop || "";
+    }
+  }
+
+  function readSavedState() {
+    try {
+      return JSON.parse(sessionStorage.getItem(STORAGE_KEY) || "null");
+    } catch (e) {
+      return null;
+    }
+  }
+
+  const climateLabel = { cool: "서늘한 지역", temperate: "중간(온대)", warm: "따뜻한 지역" };
+  const zoneLabel = { general: "일반농지", boho: "농업보호구역", jinheung: "농업진흥구역" };
+
+  function showRegion(regionId) {
+    selectedRegion = REGIONS.find((r) => r.id === regionId) || null;
+    const box = document.getElementById("indicatorBox");
+    const hint = document.getElementById("emptyHint");
+    const runBtn = document.getElementById("runBtn");
+
+    if (!selectedRegion) {
+      box.style.display = "none";
+      hint.style.display = "block";
+      runBtn.disabled = true;
+      return;
+    }
+    const s = selectedRegion.site;
+    document.getElementById("d-drought").textContent = s.droughtRisk;
+    document.getElementById("d-reservoir").textContent = s.reservoirLevel;
+    document.getElementById("d-salinity").textContent = s.salinityEC;
+    document.getElementById("d-gw").textContent = s.groundwaterStability;
+    document.getElementById("d-ph").textContent = s.soilPh;
+    document.getElementById("d-frost").textContent = s.frostRisk;
+    document.getElementById("d-climate").textContent = climateLabel[s.climateZone] || s.climateZone;
+    document.getElementById("d-zone").textContent = zoneLabel[s.zoneType] || s.zoneType;
+    const pest = (s.recentCropHistory || []).find((h) => h.pestIssue);
+    document.getElementById("pestCrop").value = pest ? pest.crop : "";
+    document.getElementById("regionSourceNote").textContent = `출처: ${selectedRegion.source_note}`;
+
+    box.style.display = "block";
+    hint.style.display = "none";
+    runBtn.disabled = false;
+  }
+
+  document.getElementById("regionSelect").addEventListener("change", (e) => showRegion(e.target.value));
+
+  document.getElementById("runBtn").addEventListener("click", () => {
+    if (!selectedRegion) return;
+    const area = Number(document.getElementById("area").value) || 1000;
+    const pestCrop = document.getElementById("pestCrop").value;
+    const site = {
+      ...selectedRegion.site,
+      recentCropHistory: pestCrop ? [{ crop: pestCrop, pestIssue: true }] : [],
+    };
+    const results = recommendCrops(site, area);
+    const state = {
+      regionId: selectedRegion.id,
+      regionName: selectedRegion.name,
+      sourceNote: selectedRegion.source_note,
+      area,
+      pestCrop,
+      results,
+    };
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    window.location.href = "result.html";
+  });
+
+  loadRegions();
+</script>
+</body>
+</html>

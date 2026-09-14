@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>파종내비 — 추천 결과</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🌾 파종내비 — 농지 조건 기반 작물 추천 <span class="badge">DEMO</span></h1>
+    <p id="regionSubtitle"></p>
+  </header>
+
+  <div id="content"></div>
+</div>
+
+<script>
+  const STORAGE_KEY = "seedjongNaviState";
+
+  function readState() {
+    try {
+      return JSON.parse(sessionStorage.getItem(STORAGE_KEY) || "null");
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function fmtWon(n) {
+    const man = 10000;
+    const sign = n < 0 ? "-" : "";
+    const abs = Math.abs(n);
+    if (abs >= man) return `${sign}${Math.round(abs / man).toLocaleString()}만원`;
+    return `${sign}${abs.toLocaleString()}원`;
+  }
+
+  function riskClass(label) {
+    if (label === "안정적") return "stable";
+    if (label === "보통") return "mid";
+    return "high";
+  }
+
+  const state = readState();
+  const content = document.getElementById("content");
+
+  if (!state || !state.results) {
+    content.innerHTML = `
+      <div class="card">
+        <p class="empty-hint">아직 추천 결과가 없습니다. 먼저 지역을 선택해주세요.</p>
+        <a class="run" href="index.html">농지 조건 입력으로 이동</a>
+      </div>`;
+  } else {
+    document.getElementById("regionSubtitle").textContent = `선택 지역: ${state.regionName} · 재배 면적 ${state.area.toLocaleString()}㎡ 기준`;
+
+    const top = state.results.slice(0, 6);
+    const html = top.map((r, i) => `
+      <div class="result-item">
+        <div class="result-head">
+          <div><span class="rank">#${i + 1}</span><span class="name">${r.name}</span> <span style="font-size:12px;color:#99a;">(${r.family})</span></div>
+          <span class="risk-badge ${riskClass(r.profit.riskLabel)}">${r.profit.riskLabel}</span>
+        </div>
+        ${r.warnings.length ? `<div class="warn">⚠ ${r.warnings.join(" · ")}</div>` : ""}
+        <div class="profit-row">
+          <span>매출 <b>${fmtWon(r.profit.revenue)}</b></span>
+          <span>비용 <b>${fmtWon(r.profit.cost)}</b></span>
+          <span>보조금 <b>${fmtWon(r.profit.subsidy)}</b></span>
+        </div>
+        <div class="profit-range">참고 손익 ${fmtWon(r.profit.profitLow)} ~ ${fmtWon(r.profit.profitHigh)}</div>
+      </div>
+    `).join("");
+
+    content.innerHTML = `
+      <div class="card">
+        <h2>추천 작물 순위 및 손익 참고치 (상위 6개)</h2>
+        ${html}
+      </div>
+      <a class="run secondary" href="index.html">지역 다시 선택</a>
+      <div class="mock-note">
+        ※ 매출·비용·보조금·손익 범위는 실제 KAMIS/공익직불제 연동 전 검증용 예시(mock) 값입니다.
+        손익 범위는 최근 가격 변동성을 반영한 참고치이며(변동성 낮음=안정적 ~ 높음=변동성 높음), 실제 수익을 보장하지 않습니다.
+      </div>
+    `;
+  }
+</script>
+</body>
+</html>
