@@ -1,40 +1,65 @@
-# 클로드 코드용 프로젝트 지침 (CLAUDE.md로 저장해서 프로젝트 루트에 두세요)
+# CLAUDE.md
 
-## 프로젝트 개요
-KRC AI 디지털혁신 공모전 서비스개발 부문 제출용 MVP. PRD.md 참고.
-마감이 촉박하니 **완벽한 아키텍처보다 "동작하는 최소 스코프"를 최우선**으로 한다.
+Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
 
-## 반드시 지킬 원칙
-1. **YAGNI, 의존성 최소화, 가독성 우선.** 지금 필요 없는 프레임워크·추상화·라이브러리를 먼저 제안하지 말 것.
-2. **기존 파일을 재작성하지 말고 이식할 것.** `crop_matcher.js`의 스코어링 로직과 `index.html`의 화면 구조는
-   이미 검증됐으니, 처음부터 새로 설계하지 말고 그대로 가져다 쓰거나 최소한만 리팩토링한다.
-3. **크레덴셜은 절대 코드에 하드코딩하지 않는다.** 지금은 API 키가 없으니 해당 없지만, 설정이 필요해지면
-   환경변수/`.env` 패턴을 쓴다.
-4. **로컬 실행이 쉬워야 한다.** `npm install && npm start` (또는 그냥 브라우저로 index.html 열기) 수준으로 충분.
-   Docker, DB 서버, 클라우드 배포 설정 등은 지금 단계에서 제안하지 말 것.
-5. **새 기능을 추가하기 전에 "지금 서면심사 제출에 실제로 필요한가?"를 먼저 자문할 것.** 필요 없으면 PRD의
-   Out of scope로 넘기고 지금은 만들지 않는다.
-6. 코드는 항상 **실행 가능한 최소 단위로 먼저 완성**하고, 그다음에 확장한다. 한 번에 전체 기능을 다 만들려고 하지 말 것.
+**Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
 
-## 작업 순서 (이 순서대로 진행)
-1. `PRD.md` 전체를 읽고 시작한다.
-2. 프로젝트 폴더 구조를 잡는다 (예: `/src`, `/data`, `index.html` 또는 프레임워크 없는 정적 구조).
-3. 첨부된 `crop_matcher.js`를 프로젝트에 그대로 옮기고, 필요한 최소한의 수정만 한다 (스코어링 공식 자체는 바꾸지 말 것 — 이미 두 가지 시나리오로 검증됨).
-4. `/data/regions.json` 같은 파일을 만들어 표본 지역 3~5곳의 8개 지표 값을 정적 데이터로 넣는다.
-   (이 값은 개발자가 흙토람·농업기상정보서비스 등 웹사이트에서 직접 조회해서 채워 넣을 예정 — 지금은 임시 mock 값으로 자리만 잡아두고, 실제 값은 나중에 채워도 좋다고 언급해줄 것)
-5. 기존 `index.html`의 UI를 살려서, 슬라이더 수동입력 대신 "지역 선택 드롭다운"으로 지표 값이 자동으로 채워지도록 연결한다. 수동 슬라이더는 보조 옵션으로 남겨도 됨.
-6. 로컬에서 실제로 열어서 3~5개 지역 모두 정상적으로 추천 결과가 나오는지 직접 확인한다.
-7. 완료 후 무엇을 만들었는지, 어떻게 실행하는지 간단한 README를 만든다.
+## 1. Think Before Coding
 
-## 완료 기준 (Definition of Done)
-- [ ] 별도 설치/서버 설정 없이 로컬에서 바로 실행/확인 가능
-- [ ] 표본 지역 3곳 이상에서 서로 다른 추천 결과가 나옴 (하드코딩된 고정 출력이 아님)
-- [ ] 손익 참고치·경고 문구가 화면에 정상 표시됨
-- [ ] 코드에 API 키/크레덴셜이 하드코딩되어 있지 않음
-- [ ] README에 실행 방법이 3줄 이내로 설명되어 있음
+**Don't assume. Don't hide confusion. Surface tradeoffs.**
 
-## 하지 말아야 할 것
-- React/Vue 등 무거운 프레임워크 새로 도입 (지금 vanilla JS로 충분히 동작 중)
-- 실제 Open API 연동 시도 (지금은 정적 데이터 단계 — PRD의 Out of scope 참고)
-- 로그인/회원가입, DB 서버 구축
-- 8개 지표 스코어링 공식을 임의로 "개선"하는 것 (이미 검증된 로직이므로 임의 변경 금지, 버그 수정은 예외)
+Before implementing:
+- State your assumptions explicitly. If uncertain, ask.
+- If multiple interpretations exist, present them - don't pick silently.
+- If a simpler approach exists, say so. Push back when warranted.
+- If something is unclear, stop. Name what's confusing. Ask.
+
+## 2. Simplicity First
+
+**Minimum code that solves the problem. Nothing speculative.**
+
+- No features beyond what was asked.
+- No abstractions for single-use code.
+- No "flexibility" or "configurability" that wasn't requested.
+- No error handling for impossible scenarios.
+- If you write 200 lines and it could be 50, rewrite it.
+
+Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+
+## 3. Surgical Changes
+
+**Touch only what you must. Clean up only your own mess.**
+
+When editing existing code:
+- Don't "improve" adjacent code, comments, or formatting.
+- Don't refactor things that aren't broken.
+- Match existing style, even if you'd do it differently.
+- If you notice unrelated dead code, mention it - don't delete it.
+
+When your changes create orphans:
+- Remove imports/variables/functions that YOUR changes made unused.
+- Don't remove pre-existing dead code unless asked.
+
+The test: Every changed line should trace directly to the user's request.
+
+## 4. Goal-Driven Execution
+
+**Define success criteria. Loop until verified.**
+
+Transform tasks into verifiable goals:
+- "Add validation" → "Write tests for invalid inputs, then make them pass"
+- "Fix the bug" → "Write a test that reproduces it, then make it pass"
+- "Refactor X" → "Ensure tests pass before and after"
+
+For multi-step tasks, state a brief plan:
+```
+1. [Step] → verify: [check]
+2. [Step] → verify: [check]
+3. [Step] → verify: [check]
+```
+
+Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+
+---
+
+**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.

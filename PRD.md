@@ -360,7 +360,7 @@
 - `DATA_GO_KR_SERVICE_KEY`
 - `SYNC_WEEKLY_SECRET`
 - `FARM_IMPORT_SECRET`
-- `KAMIS_CERT_KEY`, `KAMIS_CERT_ID` (가격 재학습 시)
+- `KAMIS_CERT_KEY`, `KAMIS_CERT_ID` (가격 재학습 시 + `kamis-price` Edge Function의 실시간 시세 조회)
 
 ### Android 배포
 

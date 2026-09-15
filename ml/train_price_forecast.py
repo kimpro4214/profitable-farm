@@ -50,11 +50,37 @@ ITEM_ALIASES = {
     "건고추": "고추", "풋고추": "고추",
 }
 KAMIS_CATEGORIES = ("100", "200", "300", "400")
-FEATURES = [
+# 결측 없이 항상 채워지는 핵심 피처. 학습 대상 행/실제 예측 입력 행을 고르는
+# dropna 기준으로도 쓰인다 — 이 리스트에 넣으면 그 값이 없는 행은 통째로 제외된다.
+CORE_FEATURES = [
     "price_lag_1", "price_lag_7", "price_lag_14", "price_mean_7",
     "price_std_7", "month_sin", "month_cos", "avg_temp", "min_temp",
     "max_temp", "rainfall", "humidity", "sunshine",
 ]
+# 초반 이력 부족 등으로 결측이 자연 발생할 수 있는 보조 피처. HistGradientBoostingRegressor는
+# NaN을 분기 방향으로 학습하므로 결측을 채우지 않고 그대로 둔다. dropna 기준에서는 제외한다.
+EXTRA_FEATURES: list[str] = [
+    "dow_sin", "dow_cos", "year", "days_until_holiday",
+    "price_lag_365", "price_yoy_ratio", "category_peer_price_ratio",
+]
+FEATURES = CORE_FEATURES + EXTRA_FEATURES
+
+# 설/추석(음력 명절) 날짜. 이동일이라 매년 고정 규칙이 없어 직접 나열한다 — 값이 몇 개 안 되고
+# 한 번 지나면 바뀌지 않으므로 holidays/lunardate 등 새 의존성을 추가하지 않는다(YAGNI).
+# NOTE: 아래 날짜는 재확인이 필요하다 — 계획 수립 시 실시간 조회가 불가능해 기억에 의존해 채웠다.
+# 학습을 실제로 돌리기 전에 공식 달력(예: 한국천문연구원 특일 정보)으로 반드시 대조할 것.
+KOREAN_HOLIDAYS = [
+    date(2019, 2, 5), date(2019, 9, 13),
+    date(2020, 1, 25), date(2020, 10, 1),
+    date(2021, 2, 12), date(2021, 9, 21),
+    date(2022, 2, 1), date(2022, 9, 10),
+    date(2023, 1, 22), date(2023, 9, 29),
+    date(2024, 2, 10), date(2024, 9, 17),
+    date(2025, 1, 29), date(2025, 10, 6),
+    date(2026, 2, 17), date(2026, 9, 25),
+    date(2027, 2, 7), date(2027, 9, 15),
+]
+HOLIDAY_PROXIMITY_CAP_DAYS = 45
 
 
 def load_env() -> dict[str, str]:
@@ -264,10 +290,50 @@ def train(price_path: Path) -> None:
     dataset["target_price_7d"] = group.shift(-7)
     dataset["month_sin"] = np.sin(2 * np.pi * dataset["date"].dt.month / 12)
     dataset["month_cos"] = np.cos(2 * np.pi * dataset["date"].dt.month / 12)
+
+    # --- EXTRA_FEATURES: 요일·연도 트렌드 ---
+    dataset["dow_sin"] = np.sin(2 * np.pi * dataset["date"].dt.dayofweek / 7)
+    dataset["dow_cos"] = np.cos(2 * np.pi * dataset["date"].dt.dayofweek / 7)
+    dataset["year"] = dataset["date"].dt.year.astype(float)
+
+    # --- EXTRA_FEATURES: 명절(설/추석) 근접도 ---
+    holidays = sorted(KOREAN_HOLIDAYS)
+
+    def days_until_next_holiday(day: pd.Timestamp) -> float:
+        target = day.date()
+        for holiday in holidays:
+            if holiday >= target:
+                return min((holiday - target).days, HOLIDAY_PROXIMITY_CAP_DAYS)
+        return float(HOLIDAY_PROXIMITY_CAP_DAYS)
+
+    dataset["days_until_holiday"] = dataset["date"].apply(days_until_next_holiday)
+
+    # --- EXTRA_FEATURES: 전년 동기가(price_lag_365) / YoY 비율 ---
+    # 영업일 기준 365행 shift는 실제 "1년 전"과 최대 두 달가량 어긋나므로, 날짜에 +365일을
+    # 더한 뒤 같은 시리즈(crop·source_item·unit·rank)끼리 달력 기준으로 정확히 조인한다.
+    group_keys = ["crop", "source_item", "unit", "rank"]
+    prior_year = dataset[group_keys + ["date", "price"]].copy()
+    prior_year["date"] = prior_year["date"] + pd.Timedelta(days=365)
+    prior_year = prior_year.rename(columns={"price": "price_lag_365"})
+    dataset = dataset.merge(prior_year, on=group_keys + ["date"], how="left")
+    dataset["price_yoy_ratio"] = dataset["price_lag_1"] / dataset["price_lag_365"].replace(0, np.nan)
+
+    # --- EXTRA_FEATURES: 동일 카테고리 내 대체작물 가격 대비 비율 ---
+    # ITEM_ALIASES에 없는 KAMIS 품목은 collect()에서 이미 걸러지므로, peer 풀은 앱이
+    # 추적하는 ~40개 작물로 한정된다. kamis_prices_all_profiles.csv(카테고리 100/200/300/400
+    # 전체)로 수집했을 때 더 풍부해진다.
+    category_group = dataset.groupby(["date", "category"])["price"]
+    category_sum = category_group.transform("sum")
+    category_count = category_group.transform("count")
+    peer_mean = (category_sum - dataset["price"]) / (category_count - 1).replace(0, np.nan)
+    dataset["category_peer_price_ratio"] = dataset["price"] / peer_mean.replace(0, np.nan)
+
     # 최근 7일은 아직 정답(target_price_7d)이 없으므로 학습에서는 제외하되,
     # 미래 예측 입력으로는 반드시 남긴다. 예전 구현은 이 행들까지 먼저 제거해
     # 이미 지난 날짜를 '7일 예측'으로 내보내는 문제가 있었다.
-    training_dataset = dataset.dropna(subset=FEATURES + ["target_price_7d"])
+    # dropna는 결측이 없어야 하는 CORE_FEATURES 기준으로만 건다 — EXTRA_FEATURES는
+    # HistGradientBoostingRegressor가 NaN을 그대로 학습하도록 남겨둔다.
+    training_dataset = dataset.dropna(subset=CORE_FEATURES + ["target_price_7d"])
     if len(training_dataset) < 80:
         raise RuntimeError(f"학습 행이 부족합니다({len(training_dataset)}행). KAMIS 수집 기간을 늘리세요.")
 
@@ -294,7 +360,7 @@ def train(price_path: Path) -> None:
             & (dataset["source_item"] == source_item)
             & (dataset["unit"] == unit)
             & (dataset["rank"] == rank)
-        ].dropna(subset=FEATURES).sort_values("date")
+        ].dropna(subset=CORE_FEATURES).sort_values("date")
         row = forecast_rows.iloc[-1]
         value = float(model.predict(pd.DataFrame([row[FEATURES].to_dict()]))[0])
         forecasts.append({
@@ -308,7 +374,7 @@ def train(price_path: Path) -> None:
             "sourceUnit": unit,
             "priceBasis": "kg" if "kg" in str(unit).lower() else "each",
             "sourceItem": source_item, "rank": rank,
-            "market": "KAMIS 전국 도매가격", "model": "품목·단위별 HistGradientBoostingRegressor (가격 지연값·계절성·ASOS 기상)",
+            "market": "KAMIS 전국 도매가격", "model": "품목·단위별 HistGradientBoostingRegressor (가격 지연값·계절성·요일·명절근접도·전년동기가·대체작물가격·ASOS 기상)",
             "source": "KAMIS + 기상청 ASOS", "weatherImputation": "ASOS 관측 종료일 이후 마지막 관측값/중앙값 보정",
             "metrics": {"maeWon": round(mae, 1), "mapePercent": round(mape, 2), "testRows": len(test_frame)},
             "notice": "예측 참고치이며 실제 가격은 출하량·시장 상황에 따라 달라질 수 있습니다.",
