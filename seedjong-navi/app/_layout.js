@@ -1,6 +1,7 @@
 import { Stack } from "expo-router";
 import { Platform, StyleSheet, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import AuthGate from "../components/AuthGate";
 import { RegionProvider } from "../context/RegionContext";
 import { RecommendationProvider } from "../context/RecommendationContext";
 
@@ -10,7 +11,9 @@ export default function RootLayout() {
       <SafeAreaView edges={["top"]} style={styles.safeArea}>
       <View style={styles.canvas}>
         <RegionProvider>
-          <RecommendationProvider><Stack screenOptions={{ headerShown: false }} /></RecommendationProvider>
+          <RecommendationProvider>
+            <AuthGate><Stack screenOptions={{ headerShown: false }} /></AuthGate>
+          </RecommendationProvider>
         </RegionProvider>
       </View>
       </SafeAreaView>
