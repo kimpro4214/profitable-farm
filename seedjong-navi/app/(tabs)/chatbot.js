@@ -14,6 +14,7 @@ export default function Chatbot() {
   const [historyLoading, setHistoryLoading] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [remaining, setRemaining] = useState(null); // 오늘 남은 질문 횟수(서버 응답 기준)
   const threadRef = useRef(null);
 
   useEffect(() => {
@@ -82,7 +83,12 @@ export default function Chatbot() {
       const { data, error: callError } = await supabase.functions.invoke("ask-rag", {
         body: { question: value, history: recentHistory },
       });
-      if (callError || data?.error) throw new Error(data?.error || callError.message);
+      if (callError || data?.error) {
+        // 401/429 등 non-2xx 응답은 data가 비어 있으므로 응답 본문에서 서버 메시지를 꺼낸다.
+        const body = data ?? (await callError?.context?.json?.().catch(() => null));
+        throw new Error(body?.error || callError?.message);
+      }
+      if (typeof data.remaining === "number") setRemaining(data.remaining);
 
       const sourceLabel = data.sources?.length
         ? data.sources.map((source) => source.label).slice(0, 2).join(", ")
@@ -141,6 +147,7 @@ export default function Chatbot() {
           ))}
           {loading ? <View style={styles.bot}><Text style={styles.botText}>답변을 찾는 중입니다...</Text></View> : null}
           {error ? <Text style={styles.error}>{error}</Text> : null}
+          {remaining !== null && !error ? <Text style={styles.remaining}>오늘 남은 질문 {remaining}회</Text> : null}
         </ScrollView>
 
         <View style={styles.composer}>
@@ -172,6 +179,7 @@ const styles = StyleSheet.create({
   botText: { fontSize: 14, color: COLORS.textMain, lineHeight: 20 },
   citation: { alignSelf: "flex-start", fontSize: 10, color: COLORS.textFaint },
   error: { fontSize: 12, color: COLORS.loss },
+  remaining: { fontSize: 12, color: COLORS.textFaint, textAlign: "right" },
   empty: { paddingVertical: 28, textAlign: "center", fontSize: 13, color: COLORS.textFaint },
   composer: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 10, borderTopWidth: 1, borderTopColor: COLORS.line, backgroundColor: COLORS.bg },
   inputRow: { flexDirection: "row", gap: 8 },

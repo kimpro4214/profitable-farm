@@ -34,6 +34,8 @@ EXPO_PUBLIC_GOOGLE_MAPS_API_KEY= # Android 지도 사용 시
 
 서버 비밀 값(Gemini API 키, Supabase service role 키, Kakao client secret, 동기화·가져오기 비밀 값)은 `.env`에 넣지 않고 Supabase Edge Function secrets에 등록합니다.
 
+챗봇(`ask-rag`)은 로그인한 사용자별로 하루 5회(한국 시간 기준)까지만 Gemini를 호출합니다. 한도를 바꾸려면 Edge Function secret `ASK_RAG_DAILY_LIMIT`에 숫자를 등록하세요.
+
 ## Supabase 배포
 
 ```powershell

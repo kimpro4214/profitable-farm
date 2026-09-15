@@ -90,6 +90,29 @@ Deno.serve(async (req) => {
     }
 
     const db = createClient(supabaseUrl, serviceRoleKey);
+
+    // 로그인한 사용자만 호출할 수 있고, 사용자별로 하루 호출 횟수를 제한한다.
+    // (Gemini 무료 할당량을 외부 반복 호출로 소진하지 않도록 Gemini 호출 전에 검사)
+    const authorization = req.headers.get("Authorization") || "";
+    const { data: userResult } = authorization.startsWith("Bearer ")
+      ? await db.auth.getUser(authorization.slice(7))
+      : { data: { user: null } };
+    if (!userResult?.user) return json({ error: "로그인 후 이용할 수 있습니다." }, 401);
+
+    const dailyLimit = Number(Deno.env.get("ASK_RAG_DAILY_LIMIT") ?? 5);
+    const { data: usedCount, error: quotaError } = await db.rpc("consume_ask_rag_quota", {
+      p_user_id: userResult.user.id,
+      p_limit: dailyLimit,
+    });
+    if (quotaError) throw quotaError;
+    if (usedCount == null) {
+      return json({
+        error: `오늘 질문 한도(${dailyLimit}회)를 모두 사용했습니다. 내일 다시 이용해 주세요.`,
+        remaining: 0,
+      }, 429);
+    }
+    const remaining = Math.max(dailyLimit - usedCount, 0);
+
     const { count, error: countError } = await db
       .from("documents")
       .select("id", { count: "exact", head: true });
@@ -181,6 +204,7 @@ Deno.serve(async (req) => {
       .join("");
     return json({
       answer: answer || "답변을 생성하지 못했습니다.",
+      remaining,
       sources: (docs ?? []).map((d: { title: string; source_url?: string }) => ({
         label: d.title,
         url: d.source_url,
