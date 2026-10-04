@@ -23,6 +23,8 @@ npx.cmd eas-cli@latest deploy --prod --export-dir dist
 
 `최근 KAMIS 시세 조회`는 별도 Supabase Edge Function `kamis-price`를 호출합니다. 처음 적용하거나 함수 코드를 바꿨다면 서버 시크릿 `KAMIS_CERT_KEY`, `KAMIS_CERT_ID`를 등록하고 `npx.cmd supabase functions deploy kamis-price`도 실행합니다.
 
+추천 화면의 AI 가격 예측은 `price_forecast_snapshots` 테이블에서 최신 학습 결과를 읽습니다. 자동 갱신을 시작하려면 루트 `README.md`의 KAMIS 가격 갱신 절차에 따라 DB 마이그레이션과 GitHub Actions secrets를 설정해야 합니다. 이 기능이 포함된 앱을 한 번 배포한 뒤에는 매일 예측 갱신 시 웹을 재배포할 필요가 없습니다.
+
 ## Vercel 배포
 
 1. Vercel에서 Git 저장소를 연결합니다.

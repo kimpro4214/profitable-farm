@@ -1,9 +1,9 @@
 /**
  * 수익농가 — 농지 조건 기반 작물 추천 매칭 로직
  *
- * 가격과 가격 범위는 KAMIS 도매가격·기상청 ASOS로 학습한 예측 산출물을
- * 우선 사용한다. 수확량·경영비는 농촌진흥청 2019~2024 소득자료로 검증된
- * 산출물을 사용하고, 산출물이 없는 품목만 기존 기준값으로 대체한다.
+ * 매출 단가·수확량·경영비는 농촌진흥청 소득자료를 우선 사용한다.
+ * KAMIS 예측은 가격 참고 표시와 수익 범위 산정에 사용한다.
+ * 소득자료가 없는 품목은 기존 기준값으로 대체한다.
  *
  * 이 파일은 프레임워크/외부 라이브러리 없이 순수 JS로 작성되어,
  * <script> 태그로 바로 불러 쓰거나 Node로 바로 테스트할 수 있습니다.
@@ -296,8 +296,8 @@ function riskLabel(volatility) {
   return RISK_LABELS.find((r) => volatility <= r.max).label;
 }
 
-function getForecastForCrop(cropName) {
-  const forecast = PRICE_FORECASTS.find((item) => item.crop === cropName);
+function getForecastForCrop(cropName, forecasts = PRICE_FORECASTS) {
+  const forecast = forecasts.find((item) => item.crop === cropName);
   if (!forecast?.forecastDate) return null;
   // 지난 날짜를 향한 예측은 현재 시세처럼 표시하거나 수익 범위에 사용하지 않는다.
   const todayKst = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
@@ -404,7 +404,7 @@ function estimateProfit(
         : incomeEstimate
           ? "농촌진흥청 최신 공식 경영비"
           : "품목 비용 기준값",
-      marketForecast ? "KAMIS·기상청 ASOS 예측으로 변동폭 산정" : "품목 변동성 기준값",
+      marketForecast ? `${marketForecast.source} 예측으로 변동폭 산정` : "품목 변동성 기준값",
     ].join(" · "),
     forecast: marketForecast || null,
     incomeEstimate: incomeEstimate || null,
@@ -417,7 +417,7 @@ function estimateProfit(
 // 5. 작물 1개 평가 + 메인 함수: 농지 조건 → 작물 추천 리스트
 // ---------------------------------------------------------------------------
 function evaluateCrop(site, crop, areaSqm, overrides = {}, options = {}) {
-  const forecast = getForecastForCrop(crop.name);
+  const forecast = getForecastForCrop(crop.name, options.forecasts);
   const month = Number.isInteger(options.month) ? options.month : new Date().getMonth() + 1;
   const season = evaluateSeason(crop.name, month);
   const axisScores = {

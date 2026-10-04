@@ -4,6 +4,7 @@ import AiAnalysisLoading from "../../../components/AiAnalysisLoading";
 import { useRegion } from "../../../context/RegionContext";
 import { useRecommendation } from "../../../context/RecommendationContext";
 import { recommendCrops } from "../../../lib/crop_matcher";
+import { fetchLatestPriceForecasts } from "../../../lib/priceForecasts";
 
 export default function RecommendLoading() {
   const router = useRouter();
@@ -11,16 +12,22 @@ export default function RecommendLoading() {
   const { pestCrop, area, setResults } = useRecommendation();
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    let active = true;
+    const timer = setTimeout(async () => {
       if (!selectedRegion) return;
+      const forecasts = await fetchLatestPriceForecasts();
+      if (!active) return;
       const site = {
         ...selectedRegion.site,
         recentCropHistory: pestCrop ? [{ crop: pestCrop, pestIssue: true }] : [],
       };
-      setResults(recommendCrops(site, Number(area) || 1000));
+      setResults(recommendCrops(site, Number(area) || 1000, { forecasts }));
       router.replace("/(tabs)/recommend/result");
     }, 3000);
-    return () => clearTimeout(timer);
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
   }, [area, pestCrop, router, selectedRegion, setResults]);
 
   return <AiAnalysisLoading title="AI가 작물을 추천하고 있어요" subtitle="농지 조건과 가격 흐름을 분석 중이에요." />;
