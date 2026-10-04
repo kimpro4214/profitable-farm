@@ -1,6 +1,8 @@
-import { StyleSheet, Text, View } from "react-native";
+import { useState } from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { COLORS } from "../constants/theme";
 import { fmtWon } from "../lib/format";
+import { fetchLiveKamisPrice } from "../lib/kamisPrice";
 import { getProfitInsight } from "../lib/profitSummary";
 import RiskBadge from "./RiskBadge";
 
@@ -38,6 +40,17 @@ export default function CropResultCard({ result, rank, forecast }) {
   const highlights = [modelSummary, ...insight.cons, ...supportingPros.filter((item) => item !== modelSummary)].filter(Boolean).slice(0, 2);
   const isProfit = result.profit.profit > 0;
   const profitRangeLabel = isProfit ? "수익" : "손익";
+
+  const [liveQuery, setLiveQuery] = useState({ status: "idle" });
+  const lookupLivePrice = async () => {
+    setLiveQuery({ status: "loading" });
+    try {
+      const live = await fetchLiveKamisPrice(result.name);
+      setLiveQuery({ status: "done", data: live });
+    } catch (error) {
+      setLiveQuery({ status: "error", message: error.message });
+    }
+  };
 
   return (
     <View style={styles.card}>
@@ -93,10 +106,36 @@ export default function CropResultCard({ result, rank, forecast }) {
             예상 범위 {fmtWon(forecast.lowerBoundWon)} ~ {fmtWon(forecast.upperBoundWon)}
           </Text>
           <Text style={styles.forecastMeta}>
-            KAMIS 도매가격·기상청 ASOS 학습값 (검증 MAPE {forecast.metrics.mapePercent}%)
+            {forecast.baseDate} 기준 → {forecast.forecastDate} 예측 · {forecast.source} 학습값 (검증 MAPE {forecast.metrics.mapePercent}%)
           </Text>
         </View>
       ) : null}
+
+      <View style={styles.liveBox}>
+        {liveQuery.status === "idle" ? (
+          <Pressable style={styles.liveButton} onPress={lookupLivePrice}>
+            <Text style={styles.liveButtonText}>최근 KAMIS 시세 조회</Text>
+          </Pressable>
+        ) : null}
+        {liveQuery.status === "loading" ? <Text style={styles.liveMeta}>KAMIS에서 조회 중…</Text> : null}
+        {liveQuery.status === "error" ? (
+          <Pressable onPress={lookupLivePrice}>
+            <Text style={styles.liveError}>{liveQuery.message} · 다시 시도</Text>
+          </Pressable>
+        ) : null}
+        {liveQuery.status === "done" ? (
+          <>
+            <Text style={styles.liveTitle}>🛒 최근 KAMIS 도매가격</Text>
+            <Text style={styles.liveValue}>
+              {fmtWon(liveQuery.data.priceWon)} / {liveQuery.data.unit}
+            </Text>
+            <Text style={styles.liveMeta}>
+              {liveQuery.data.regday} · {liveQuery.data.sourceItem}
+              {liveQuery.data.rank ? ` (${liveQuery.data.rank})` : ""}
+            </Text>
+          </>
+        ) : null}
+      </View>
 
       <View style={styles.insightBox}>
         <Text style={styles.insightLabel}>✦ AI 요약</Text>
@@ -151,6 +190,20 @@ const styles = StyleSheet.create({
   forecastTitle: { fontSize: 12.5, fontWeight: "700", color: COLORS.navy },
   forecastValue: { fontSize: 15, fontWeight: "700", color: COLORS.navy, marginTop: 3 },
   forecastMeta: { fontSize: 11, color: COLORS.textSub, marginTop: 2, lineHeight: 16 },
+  liveBox: { marginTop: 8 },
+  liveButton: {
+    alignSelf: "flex-start",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: COLORS.line,
+  },
+  liveButtonText: { fontSize: 12, color: COLORS.navy, fontWeight: "700" },
+  liveTitle: { fontSize: 12.5, fontWeight: "700", color: "#1f8a4c" },
+  liveValue: { fontSize: 15, fontWeight: "700", color: "#1f8a4c", marginTop: 3 },
+  liveMeta: { fontSize: 11, color: COLORS.textSub, marginTop: 2, lineHeight: 16 },
+  liveError: { fontSize: 11.5, color: COLORS.warn, lineHeight: 16 },
   insightBox: {
     marginTop: 0,
     paddingTop: 10,

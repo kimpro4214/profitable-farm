@@ -94,7 +94,7 @@ export default function Home() {
           <View style={styles.newsDivider} />
           <View style={styles.newsFooter}>
             <Text numberOfLines={1} style={styles.source}>출처: 농촌진흥청 주간농사정보</Text>
-            <Pressable onPress={() => router.push("/(tabs)/weekly-briefing")}><Text style={styles.newsLink}>원문 보기 →</Text></Pressable>
+            <Pressable onPress={() => router.push("/(tabs)/weekly-briefing")}><Text style={styles.newsLink}>자세히 보기 →</Text></Pressable>
           </View>
         </View>
       </ScrollView>

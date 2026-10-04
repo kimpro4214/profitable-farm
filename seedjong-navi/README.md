@@ -43,6 +43,7 @@ npx supabase link --project-ref <project-ref>
 npx supabase db push
 npx supabase functions deploy analyze-farm
 npx supabase functions deploy ask-rag
+npx supabase functions deploy kamis-price
 npx supabase functions deploy import-farm-reference
 npx supabase functions deploy kakao-oidc --no-verify-jwt
 npx supabase functions deploy sync-weekly-farming --no-verify-jwt
@@ -52,6 +53,7 @@ npx supabase functions deploy sync-weekly-farming --no-verify-jwt
 
 - `analyze-farm`: 농지 조건 분석
 - `ask-rag`: Gemini 기반 RAG 챗봇
+- `kamis-price`: KAMIS 최신 도매가격 조회 (`KAMIS_CERT_KEY`, `KAMIS_CERT_ID` 서버 시크릿 필요)
 - `import-farm-reference`: 참조 데이터 가져오기
 - `kakao-oidc`: Kakao 소셜 로그인 중계
 - `sync-weekly-farming`: 주간 영농 정보 동기화
