@@ -21,6 +21,8 @@ npm.cmd run check
 npx.cmd eas-cli@latest deploy --prod --export-dir dist
 ```
 
+`최근 KAMIS 시세 조회`는 별도 Supabase Edge Function `kamis-price`를 호출합니다. 처음 적용하거나 함수 코드를 바꿨다면 서버 시크릿 `KAMIS_CERT_KEY`, `KAMIS_CERT_ID`를 등록하고 `npx.cmd supabase functions deploy kamis-price`도 실행합니다.
+
 ## Vercel 배포
 
 1. Vercel에서 Git 저장소를 연결합니다.

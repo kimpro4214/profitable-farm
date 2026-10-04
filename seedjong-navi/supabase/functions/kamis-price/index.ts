@@ -143,7 +143,7 @@ Deno.serve(async (request) => {
         return json({
           crop,
           priceWon: picked.price,
-          unit: picked.item.unit || "kg",
+          unit: "kg", // p_convert_kg_yn=Y의 dpr1은 1kg 기준, unit은 원래 포장 단위로 남는다.
           sourceItem: picked.item.item_name,
           rank: picked.item.rank,
           regday: day,
