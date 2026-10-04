@@ -106,7 +106,7 @@ export default function CropResultCard({ result, rank, forecast }) {
             예상 범위 {fmtWon(forecast.lowerBoundWon)} ~ {fmtWon(forecast.upperBoundWon)}
           </Text>
           <Text style={styles.forecastMeta}>
-            KAMIS 도매가격·기상청 ASOS 학습값 (검증 MAPE {forecast.metrics.mapePercent}%)
+            {forecast.baseDate} 기준 → {forecast.forecastDate} 예측 · {forecast.source} 학습값 (검증 MAPE {forecast.metrics.mapePercent}%)
           </Text>
         </View>
       ) : null}
@@ -114,7 +114,7 @@ export default function CropResultCard({ result, rank, forecast }) {
       <View style={styles.liveBox}>
         {liveQuery.status === "idle" ? (
           <Pressable style={styles.liveButton} onPress={lookupLivePrice}>
-            <Text style={styles.liveButtonText}>오늘 KAMIS 시세 조회</Text>
+            <Text style={styles.liveButtonText}>최근 KAMIS 시세 조회</Text>
           </Pressable>
         ) : null}
         {liveQuery.status === "loading" ? <Text style={styles.liveMeta}>KAMIS에서 조회 중…</Text> : null}
@@ -125,7 +125,7 @@ export default function CropResultCard({ result, rank, forecast }) {
         ) : null}
         {liveQuery.status === "done" ? (
           <>
-            <Text style={styles.liveTitle}>🛒 오늘 KAMIS 실시간 시세</Text>
+            <Text style={styles.liveTitle}>🛒 최근 KAMIS 도매가격</Text>
             <Text style={styles.liveValue}>
               {fmtWon(liveQuery.data.priceWon)} / {liveQuery.data.unit}
             </Text>

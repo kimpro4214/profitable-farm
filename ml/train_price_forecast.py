@@ -2,11 +2,11 @@
 
 KAMIS 도매가격(학습 정답)과 기상청 ASOS 일자료(설명 변수)를 결합해
 7일 뒤 가격을 예측한다. KRC 데이터는 지역별 작물 추천의 근거 요약으로
-별도 저장한다. API 키는 프로젝트 루트의 .env에서만 읽는다.
+별도 저장한다. KAMIS 인증 정보는 프로젝트 루트의 .env 또는 환경 변수에서 읽는다.
 
 실행 예시
   python ml/train_price_forecast.py --probe
-  python ml/train_price_forecast.py --fetch-prices --train
+  python ml/train_price_forecast.py --refresh
 """
 
 from __future__ import annotations
@@ -18,6 +18,7 @@ import json
 import os
 import re
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 import zipfile
@@ -35,6 +36,7 @@ ROOT = Path(__file__).resolve().parents[1]
 RAW = ROOT / "data" / "raw"
 OUT = ROOT / "data" / "processed"
 MODEL_OUT = ROOT / "data" / "models"
+APP_FORECASTS = ROOT / "seedjong-navi" / "data" / "price_forecasts.json"
 KAMIS_URL = "https://www.kamis.or.kr/service/price/xml.do"
 
 # 앱의 36개 추천 작물과 KAMIS 품목명을 연결한다. 같은 작물도 품종·포장단위는
@@ -86,17 +88,18 @@ HOLIDAY_PROXIMITY_CAP_DAYS = 45
 def load_env() -> dict[str, str]:
     values: dict[str, str] = {}
     env_path = ROOT / ".env"
-    if not env_path.exists():
-        raise RuntimeError("프로젝트 루트에 .env가 없습니다.")
-    for line in env_path.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
-        key, value = line.split("=", 1)
-        values[key.strip()] = value.strip().strip('"').strip("'")
+    if env_path.exists():
+        for line in env_path.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            values[key.strip()] = value.strip().strip('"').strip("'")
+    values.update({key: value for key, value in os.environ.items() if value})
+    values["KAMIS_CERT_KEY"] = values.get("KAMIS_CERT_KEY") or values.get("KAMIS_OPENAPI_KEY", "")
     for key in ("KAMIS_CERT_KEY", "KAMIS_CERT_ID"):
         if not values.get(key):
-            raise RuntimeError(f".env에 {key} 값이 필요합니다.")
+            raise RuntimeError(f"{key} 값이 필요합니다. KAMIS_CERT_ID는 API 요청자 식별 문자열입니다.")
     return values
 
 
@@ -112,20 +115,27 @@ def kamis_request(day: date, env: dict[str, str], category: str = "200") -> dict
         "p_returntype": "json",
     }
     url = f"{KAMIS_URL}?{urllib.parse.urlencode(params)}"
-    with urllib.request.urlopen(url, timeout=30) as response:
-        return json.loads(response.read().decode("utf-8"))
+    try:
+        with urllib.request.urlopen(url, timeout=30) as response:
+            return json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        raise RuntimeError(f"KAMIS HTTP 오류 {exc.code}") from None
+    except urllib.error.URLError:
+        raise RuntimeError("KAMIS 연결 실패") from None
 
 
 def unwrap_items(payload: dict) -> list[dict]:
     data = payload.get("data", {})
     if isinstance(data, list):
         data = data[0] if data else {}
+    if not isinstance(data, dict):
+        match = re.search(r"(?<!\d)(000|001|200|900)(?!\d)", str(data))
+        raise RuntimeError(f"KAMIS 응답 오류 코드 {match.group(1) if match else 'unknown'}")
     # KAMIS의 condition 필드는 요청 파라미터(인증키 포함)를 그대로 되돌릴 수 있다.
     # 오류 메시지에 condition 전체를 넣으면 안 된다.
     code = str(data.get("error_code", data.get("code", "000")))
     if code not in ("000", "0"):
-        message = str(data.get("message", data.get("error_message", "알 수 없는 오류")))
-        raise RuntimeError(f"KAMIS 응답 오류 코드 {code}: {message}")
+        raise RuntimeError(f"KAMIS 응답 오류 코드 {code}")
     items = data.get("item", []) if isinstance(data, dict) else []
     return items if isinstance(items, list) else [items]
 
@@ -139,14 +149,31 @@ def to_price(value: object) -> float | None:
 
 
 def probe() -> None:
-    payload = kamis_request(date.today() - timedelta(days=1), load_env())
-    items = unwrap_items(payload)
-    names = sorted({str(item.get("item_name", "")) for item in items})
-    print(f"KAMIS 연결 성공: 채소류 {len(items)}건, 예시 품목 {', '.join(names[:8])}")
+    env = load_env()
+    for offset in range(1, 8):
+        try:
+            items = unwrap_items(kamis_request(date.today() - timedelta(days=offset), env))
+        except RuntimeError as exc:
+            if "오류 코드 001" in str(exc):
+                continue
+            raise
+        if items:
+            names = sorted({str(item.get("item_name", "")) for item in items})
+            print(f"KAMIS 연결 성공: 채소류 {len(items)}건, 예시 품목 {', '.join(names[:8])}")
+            return
+    raise RuntimeError("최근 7일 안에 KAMIS 채소류 가격 자료가 없습니다.")
 
 
 def fetch_prices(start: date, end: date, categories: tuple[str, ...] = ("200",), filename: str = "kamis_prices_vegetables.csv") -> Path:
     env = load_env()
+    # 인증 실패를 수백 건의 수집 요청 전에 확인한다.
+    for offset in range(7):
+        try:
+            unwrap_items(kamis_request(end - timedelta(days=offset), env, categories[0]))
+            break
+        except RuntimeError as exc:
+            if "오류 코드 001" not in str(exc):
+                raise
     target = RAW / filename
     existing: set[tuple[str, str]] = set()
     if target.exists():
@@ -160,7 +187,8 @@ def fetch_prices(start: date, end: date, categories: tuple[str, ...] = ("200",),
         try:
             items = unwrap_items(kamis_request(one_day, env, category))
         except Exception as exc:  # 휴장일/no data도 학습에서 제외한다.
-            return [{"_error": f"{one_day.isoformat()} / {category}: {exc}"}]
+            message = str(exc) if isinstance(exc, RuntimeError) else type(exc).__name__
+            return [{"_error": f"{one_day.isoformat()} / {category}: {message}"}]
         output = []
         for item in items:
             name = str(item.get("item_name", "")).strip()
@@ -203,6 +231,103 @@ def fetch_prices(start: date, end: date, categories: tuple[str, ...] = ("200",),
     return target
 
 
+def fetch_period_prices(start: date, end: date) -> Path:
+    """기간별 API로 1년치 도매시장 가격을 수집한다."""
+    if (end - start).days > 364:
+        raise ValueError("KAMIS 기간별 도매가격 조회는 최대 1년입니다.")
+    env = load_env()
+    profiles: dict[str, tuple[date, str, dict]] = {}
+    # 계절 품목도 발견하도록 1년의 월별 표본 날짜에서 품목 코드를 찾는다.
+    for category in KAMIS_CATEGORIES:
+        for offset in range(0, (end - start).days + 1, 30):
+            sample_day = end - timedelta(days=offset)
+            sample_day -= timedelta(days=max(0, sample_day.weekday() - 4))
+            try:
+                items = unwrap_items(kamis_request(sample_day, env, category))
+            except RuntimeError as exc:
+                if "오류 코드 001" in str(exc):
+                    continue
+                raise
+            for item in items:
+                crop = ITEM_ALIASES.get(str(item.get("item_name", "")).strip())
+                if not crop or not all(item.get(key) for key in ("item_code", "kind_code", "rank_code")):
+                    continue
+                if to_price(item.get("dpr1")) is None:
+                    continue
+                previous = profiles.get(crop)
+                rank_score = 1 if "상품" in str(item.get("rank", "")) else 0
+                previous_score = 1 if previous and "상품" in str(previous[2].get("rank", "")) else 0
+                if previous is None or rank_score > previous_score or (rank_score == previous_score and sample_day > previous[0]):
+                    profiles[crop] = (sample_day, category, item)
+
+    if not profiles:
+        raise RuntimeError("KAMIS에서 학습 대상 품목 코드를 찾지 못했습니다.")
+
+    def collect(crop: str, category: str, profile: dict) -> list[dict]:
+        params = {
+            "action": "periodWholesaleProductList",
+            "p_startday": start.isoformat(), "p_endday": end.isoformat(),
+            "p_itemcategorycode": category,
+            "p_itemcode": str(profile["item_code"]),
+            "p_kindcode": str(profile["kind_code"]),
+            "p_productrankcode": str(profile["rank_code"]),
+            "p_convert_kg_yn": "Y",
+            "p_cert_key": env["KAMIS_CERT_KEY"],
+            "p_cert_id": env["KAMIS_CERT_ID"],
+            "p_returntype": "json",
+        }
+        url = f"{KAMIS_URL}?{urllib.parse.urlencode(params)}"
+        try:
+            with urllib.request.urlopen(url, timeout=30) as response:
+                items = unwrap_items(json.loads(response.read().decode("utf-8")))
+        except urllib.error.HTTPError as exc:
+            raise RuntimeError(f"KAMIS 기간별 HTTP 오류 {exc.code}") from None
+        except urllib.error.URLError:
+            raise RuntimeError("KAMIS 기간별 API 연결 실패") from None
+        except RuntimeError as exc:
+            if "오류 코드 001" in str(exc):
+                return []
+            raise
+        daily: dict[str, list[float]] = {}
+        for item in items:
+            if not isinstance(item, dict) or not item.get("marketname"):
+                continue
+            price = to_price(item.get("price"))
+            raw_day = str(item.get("regday", "")).replace("/", "-")
+            day_text = raw_day if len(raw_day) == 10 else f"{item.get('yyyy', '')}-{raw_day}"
+            try:
+                day = date.fromisoformat(day_text)
+            except ValueError:
+                continue
+            if price is not None and start <= day <= end:
+                daily.setdefault(day.isoformat(), []).append(price)
+        return [{
+            "date": day, "crop": crop, "price": round(sum(prices) / len(prices), 2),
+            "source_item": profile["item_name"], "unit": profile.get("unit", ""),
+            "rank": profile.get("rank", ""), "category": category,
+            "source": "KAMIS periodWholesaleProductList (wholesale market mean)",
+        } for day, prices in daily.items()]
+
+    rows: list[dict] = []
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        futures = {
+            pool.submit(collect, crop, category, profile): crop
+            for crop, (_, category, profile) in profiles.items()
+        }
+        for future in as_completed(futures):
+            rows.extend(future.result())
+    if not rows:
+        raise RuntimeError("KAMIS 기간별 도매가격 자료를 받지 못했습니다.")
+    target = RAW / "kamis_prices_period.csv"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with target.open("w", newline="", encoding="utf-8-sig") as handle:
+        writer = csv.DictWriter(handle, fieldnames=["date", "crop", "price", "source_item", "unit", "rank", "category", "source"])
+        writer.writeheader()
+        writer.writerows(sorted(rows, key=lambda row: (row["crop"], row["date"])))
+    print(f"KAMIS 기간별 가격 수집: {len(profiles)}개 작물, {len(rows)}개 날짜별 평균")
+    return target
+
+
 def read_csv_bytes(data: bytes) -> pd.DataFrame:
     for encoding in ("utf-8-sig", "cp949", "euc-kr"):
         try:
@@ -233,7 +358,7 @@ def choose_column(frame: pd.DataFrame, keyword: str) -> str | None:
     return next((column for column in frame.columns if keyword in str(column)), None)
 
 
-def build_weather() -> pd.DataFrame:
+def build_weather() -> pd.DataFrame | None:
     records: list[pd.DataFrame] = []
     for path in (RAW / "weather").rglob("*.zip"):
         for frame in weather_frames_from_zip(path):
@@ -246,7 +371,7 @@ def build_weather() -> pd.DataFrame:
                 output[name] = pd.to_numeric(frame[column], errors="coerce") if column else np.nan
             records.append(output)
     if not records:
-        raise RuntimeError("data/raw/weather 안의 ASOS zip 파일을 읽지 못했습니다.")
+        return None
     weather = pd.concat(records, ignore_index=True).dropna(subset=["date"])
     weather = weather.groupby("date", as_index=False).mean(numeric_only=True)
     weather["date"] = weather["date"].dt.date.astype(str)
@@ -268,26 +393,46 @@ def summarize_krc() -> None:
 
 
 def train(price_path: Path) -> None:
+    OUT.mkdir(parents=True, exist_ok=True)
     prices = pd.read_csv(price_path)
     prices["date"] = pd.to_datetime(prices["date"], errors="coerce")
     prices["price"] = pd.to_numeric(prices["price"], errors="coerce")
     prices = prices.dropna(subset=["date", "price"]).sort_values(["crop", "date"])
+    market_label = "KAMIS 도매시장 평균" if prices["source"].astype(str).str.contains("periodWholesaleProductList").any() else "KAMIS 전국 도매가격"
     weather = build_weather()
-    weather["date"] = pd.to_datetime(weather["date"])
-    dataset = prices.merge(weather, on="date", how="left")
+    if weather is not None:
+        weather["date"] = pd.to_datetime(weather["date"])
+        dataset = prices.merge(weather, on="date", how="left")
+    else:
+        dataset = prices.copy()
+        print("ASOS 원본이 없어 KAMIS 가격·계절성만으로 학습합니다.")
     dataset = dataset.sort_values(["crop", "source_item", "unit", "rank", "date"])
     # ASOS 원본의 관측 종료일 이후에는 마지막 관측값을 사용한다. 이 사실은 산출물에
     # 남기며, 다음 ASOS 파일을 넣고 재실행하면 자동으로 실제 관측값으로 교체된다.
     weather_columns = ["avg_temp", "min_temp", "max_temp", "rainfall", "humidity", "sunshine"]
-    dataset[weather_columns] = dataset[weather_columns].ffill().bfill()
-    dataset[weather_columns] = dataset[weather_columns].fillna(dataset[weather_columns].median(numeric_only=True))
+    if weather is not None:
+        dataset[weather_columns] = dataset[weather_columns].ffill().bfill()
+        dataset[weather_columns] = dataset[weather_columns].fillna(dataset[weather_columns].median(numeric_only=True))
+    core_features = [feature for feature in CORE_FEATURES if feature not in weather_columns or weather is not None]
+    features = [feature for feature in FEATURES if feature not in weather_columns or weather is not None]
     group = dataset.groupby(["crop", "source_item", "unit", "rank"])["price"]
     dataset["price_lag_1"] = group.shift(1)
     dataset["price_lag_7"] = group.shift(7)
     dataset["price_lag_14"] = group.shift(14)
     dataset["price_mean_7"] = group.transform(lambda series: series.shift(1).rolling(7).mean())
     dataset["price_std_7"] = group.transform(lambda series: series.shift(1).rolling(7).std())
-    dataset["target_price_7d"] = group.shift(-7)
+    # 정확히 7일 뒤 또는 그 후 3일 이내의 첫 거래일 가격을 정답으로 사용한다.
+    # 7행 shift는 주말·휴장일 때문에 7일 뒤 가격과 일치하지 않는다.
+    series_keys = ["crop", "source_item", "unit", "rank"]
+    future = dataset[series_keys + ["date", "price"]].rename(
+        columns={"date": "target_date", "price": "target_price_7d"}
+    )
+    dataset["target_day_7d"] = dataset["date"] + pd.Timedelta(days=7)
+    dataset = pd.merge_asof(
+        dataset.sort_values("target_day_7d"), future.sort_values("target_date"),
+        by=series_keys, left_on="target_day_7d", right_on="target_date",
+        direction="forward", tolerance=pd.Timedelta(days=3),
+    ).sort_values(series_keys + ["date"])
     dataset["month_sin"] = np.sin(2 * np.pi * dataset["date"].dt.month / 12)
     dataset["month_cos"] = np.cos(2 * np.pi * dataset["date"].dt.month / 12)
 
@@ -333,7 +478,7 @@ def train(price_path: Path) -> None:
     # 이미 지난 날짜를 '7일 예측'으로 내보내는 문제가 있었다.
     # dropna는 결측이 없어야 하는 CORE_FEATURES 기준으로만 건다 — EXTRA_FEATURES는
     # HistGradientBoostingRegressor가 NaN을 그대로 학습하도록 남겨둔다.
-    training_dataset = dataset.dropna(subset=CORE_FEATURES + ["target_price_7d"])
+    training_dataset = dataset.dropna(subset=core_features + ["target_price_7d"])
     if len(training_dataset) < 80:
         raise RuntimeError(f"학습 행이 부족합니다({len(training_dataset)}행). KAMIS 수집 기간을 늘리세요.")
 
@@ -344,25 +489,31 @@ def train(price_path: Path) -> None:
         series = series.sort_values("date")
         split_at = int(len(series) * 0.8)
         train_frame, test_frame = series.iloc[:split_at], series.iloc[split_at:]
+        # 검증 구간 시작 이후의 가격을 정답으로 쓰는 학습 행은 제거한다.
+        train_frame = train_frame[train_frame["target_date"] < test_frame["date"].min()]
         if len(train_frame) < 80 or len(test_frame) < 20:
             continue
+        # 짧은 수집 기간에서는 전년 동기가 전부 결측이거나 연도가 상수일 수 있다.
+        series_features = [feature for feature in features if train_frame[feature].nunique(dropna=True) > 1]
+        if not series_features:
+            continue
         model = HistGradientBoostingRegressor(max_iter=250, learning_rate=0.05, max_leaf_nodes=15, l2_regularization=1.0, random_state=42)
-        model.fit(train_frame[FEATURES], train_frame["target_price_7d"])
-        predicted = model.predict(test_frame[FEATURES])
+        model.fit(train_frame[series_features], train_frame["target_price_7d"])
+        predicted = model.predict(test_frame[series_features])
         mae = float(mean_absolute_error(test_frame["target_price_7d"], predicted))
         mape = float(mean_absolute_percentage_error(test_frame["target_price_7d"], predicted) * 100)
         residual_std = float(np.std(test_frame["target_price_7d"].to_numpy() - predicted))
         key = f"{crop}|{source_item}|{unit}|{rank}"
-        models[key] = model
+        models[key] = {"model": model, "features": series_features}
         metric_rows.append({"crop": crop, "sourceItem": source_item, "unit": unit, "rank": rank, "trainRows": len(train_frame), "testRows": len(test_frame), "maeWon": mae, "mapePercent": mape})
         forecast_rows = dataset[
             (dataset["crop"] == crop)
             & (dataset["source_item"] == source_item)
             & (dataset["unit"] == unit)
             & (dataset["rank"] == rank)
-        ].dropna(subset=CORE_FEATURES).sort_values("date")
+        ].dropna(subset=core_features).sort_values("date")
         row = forecast_rows.iloc[-1]
-        value = float(model.predict(pd.DataFrame([row[FEATURES].to_dict()]))[0])
+        value = float(model.predict(pd.DataFrame([row[series_features].to_dict()]))[0])
         forecasts.append({
             "crop": crop, "baseDate": row["date"].date().isoformat(),
             "forecastDate": (row["date"].date() + timedelta(days=7)).isoformat(),
@@ -374,11 +525,14 @@ def train(price_path: Path) -> None:
             "sourceUnit": unit,
             "priceBasis": "kg" if "kg" in str(unit).lower() else "each",
             "sourceItem": source_item, "rank": rank,
-            "market": "KAMIS 전국 도매가격", "model": "품목·단위별 HistGradientBoostingRegressor (가격 지연값·계절성·요일·명절근접도·전년동기가·대체작물가격·ASOS 기상)",
-            "source": "KAMIS + 기상청 ASOS", "weatherImputation": "ASOS 관측 종료일 이후 마지막 관측값/중앙값 보정",
+            "market": market_label, "model": "품목·단위별 HistGradientBoostingRegressor",
+            "source": "KAMIS + 기상청 ASOS" if weather is not None else "KAMIS",
+            "weatherImputation": "ASOS 관측 종료일 이후 마지막 관측값/중앙값 보정" if weather is not None else None,
             "metrics": {"maeWon": round(mae, 1), "mapePercent": round(mape, 2), "testRows": len(test_frame)},
             "notice": "예측 참고치이며 실제 가격은 출하량·시장 상황에 따라 달라질 수 있습니다.",
         })
+    if not forecasts:
+        raise RuntimeError("학습 가능한 KAMIS 품목별 시계열이 없습니다. 수집 기간을 늘리세요.")
     metrics_frame = pd.DataFrame(metric_rows)
     metrics = {
         "seriesCount": len(metric_rows), "trainRows": int(metrics_frame["trainRows"].sum()), "testRows": int(metrics_frame["testRows"].sum()),
@@ -386,14 +540,18 @@ def train(price_path: Path) -> None:
         "weightedMapePercent": round(float(np.average(metrics_frame["mapePercent"], weights=metrics_frame["testRows"])), 2),
         "series": [{**row, "maeWon": round(row["maeWon"], 1), "mapePercent": round(row["mapePercent"], 2)} for row in metric_rows],
     }
-    joblib.dump({"models": models, "features": FEATURES}, MODEL_OUT / "price_forecast_model.joblib")
+    joblib.dump({"models": models, "features": features}, MODEL_OUT / "price_forecast_model.joblib")
     (MODEL_OUT / "price_forecast_metrics.json").write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
     # 앱은 작물마다 가장 최근 데이터가 있고 검증 MAPE가 낮은 시계열 하나를 표시한다.
     selected_forecasts = []
     for crop in sorted({forecast["crop"] for forecast in forecasts}):
         candidates = [forecast for forecast in forecasts if forecast["crop"] == crop]
-        selected_forecasts.append(min(candidates, key=lambda forecast: forecast["metrics"]["mapePercent"]))
-    (OUT / "price_forecasts.json").write_text(json.dumps({"items": selected_forecasts}, ensure_ascii=False, indent=2), encoding="utf-8")
+        newest_date = max(forecast["baseDate"] for forecast in candidates)
+        newest = [forecast for forecast in candidates if forecast["baseDate"] == newest_date]
+        selected_forecasts.append(min(newest, key=lambda forecast: forecast["metrics"]["mapePercent"]))
+    forecast_json = json.dumps({"items": selected_forecasts}, ensure_ascii=False, indent=2)
+    (OUT / "price_forecasts.json").write_text(forecast_json, encoding="utf-8")
+    APP_FORECASTS.write_text(forecast_json, encoding="utf-8")
     training_dataset.to_csv(OUT / "price_training_dataset.csv", index=False, encoding="utf-8-sig")
     print("학습 완료", json.dumps({k: v for k, v in metrics.items() if k != "series"}, ensure_ascii=False))
 
@@ -403,24 +561,31 @@ def main() -> None:
     parser.add_argument("--probe", action="store_true")
     parser.add_argument("--fetch-prices", action="store_true")
     parser.add_argument("--fetch-all-prices", action="store_true")
+    parser.add_argument("--refresh", action="store_true", help="최근 1년 KAMIS 가격 수집·재학습·앱 예측 갱신")
     parser.add_argument("--train", action="store_true")
-    parser.add_argument("--start", default="2023-01-01")
+    parser.add_argument("--start")
     parser.add_argument("--end", default=(date.today() - timedelta(days=1)).isoformat())
     args = parser.parse_args()
     if args.probe:
         probe()
+    end = date.fromisoformat(args.end)
+    start = date.fromisoformat(args.start or ((end - timedelta(days=364)).isoformat() if args.refresh else "2023-01-01"))
+    if start > end:
+        parser.error("--start가 --end보다 늦습니다.")
     if args.fetch_prices:
-        price_path = fetch_prices(date.fromisoformat(args.start), date.fromisoformat(args.end))
+        price_path = fetch_prices(start, end)
+    elif args.refresh:
+        price_path = fetch_period_prices(start, end)
     elif args.fetch_all_prices:
         price_path = fetch_prices(
-            date.fromisoformat(args.start), date.fromisoformat(args.end),
+            start, end,
             categories=KAMIS_CATEGORIES, filename="kamis_prices_all_profiles.csv",
         )
     else:
+        period_path = RAW / "kamis_prices_period.csv"
         expanded_path = RAW / "kamis_prices_all_profiles.csv"
-        price_path = expanded_path if expanded_path.exists() else RAW / "kamis_prices_vegetables.csv"
-    if args.train:
-        summarize_krc()
+        price_path = period_path if period_path.exists() else expanded_path if expanded_path.exists() else RAW / "kamis_prices_vegetables.csv"
+    if args.train or args.refresh:
         train(price_path)
 
 

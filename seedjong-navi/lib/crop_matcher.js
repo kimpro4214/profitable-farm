@@ -297,7 +297,11 @@ function riskLabel(volatility) {
 }
 
 function getForecastForCrop(cropName) {
-  return PRICE_FORECASTS.find((item) => item.crop === cropName) || null;
+  const forecast = PRICE_FORECASTS.find((item) => item.crop === cropName);
+  if (!forecast?.forecastDate) return null;
+  // 지난 날짜를 향한 예측은 현재 시세처럼 표시하거나 수익 범위에 사용하지 않는다.
+  const todayKst = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  return forecast.forecastDate >= todayKst ? forecast : null;
 }
 
 function getIncomeEstimateForCrop(cropName) {

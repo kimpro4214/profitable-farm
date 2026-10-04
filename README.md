@@ -54,6 +54,27 @@ EXPO_PUBLIC_GOOGLE_MAPS_API_KEY= # Android 지도 사용 시
 
 `.env`와 실제 API 키는 Git에 포함되지 않습니다. Gemini, Supabase service role, Kakao client secret 등 서버 비밀 값은 앱 `.env`가 아니라 Supabase Edge Function secrets에만 등록합니다.
 
+### KAMIS 가격 갱신
+
+KAMIS OpenAPI 가격은 학습 스크립트가 수집하고, 앱은 갱신된 예측 파일을 읽습니다. 프로젝트 **루트** `.env`에 아래 값을 설정합니다. `KAMIS_CERT_ID`는 API 요청을 구분하는 비어 있지 않은 문자열이며 프로젝트 DB의 ID가 아닙니다. KAMIS의 일별 가격 API에서 `seedjong-navi` 문자열로 정상 호출을 확인했습니다.
+
+```text
+KAMIS_CERT_KEY=발급받은_KAMIS_OpenAPI_인증키
+KAMIS_CERT_ID=seedjong-navi
+```
+
+`KAMIS_OPENAPI_KEY`라는 변수명도 학습 스크립트에서 인증키로 인식합니다. 인증 정보는 앱의 `EXPO_PUBLIC_` 변수에 넣지 않습니다.
+
+```powershell
+python -m pip install -r ml/requirements.txt
+python ml/train_price_forecast.py --probe
+python ml/train_price_forecast.py --refresh
+```
+
+`--refresh`는 KAMIS 기간별 도매가격 API로 최근 1년의 품목별 시장 가격을 수집하고 날짜별 시장 평균을 계산합니다. 이어 7일 후 가격 예측 모델을 재학습해 `seedjong-navi/data/price_forecasts.json`을 갱신합니다. `data/raw/weather`에 ASOS 원본 ZIP이 없으면 가격·계절성 변수만 사용합니다. 앱에서는 예측일이 지난 값을 표시하지 않습니다. 수집·학습은 앱 실행 시가 아니라 관리자가 주기적으로 실행해야 합니다. 예측 JSON은 앱에 번들되므로 갱신 결과를 배포하려면 앱을 다시 빌드·배포해야 합니다.
+
+결과 카드의 최근 거래일 시세 조회는 별도 Supabase Edge Function `kamis-price`를 사용합니다. 배포 프로젝트에 `KAMIS_CERT_KEY`, `KAMIS_CERT_ID`를 secrets로 등록하고 함수를 배포해야 작동합니다. KAMIS 도매가격은 농가수취가와 다른 가격이므로 손익 계산의 매출 단가로 직접 쓰지 않습니다.
+
 ## Supabase 설정
 
 Supabase CLI에서 `seedjong-navi` 폴더를 기준으로 DB 마이그레이션과 Edge Functions를 배포합니다.
