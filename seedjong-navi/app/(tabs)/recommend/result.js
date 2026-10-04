@@ -8,6 +8,7 @@ import { COLORS } from "../../../constants/theme";
 import { useRegion } from "../../../context/RegionContext";
 import { useRecommendation } from "../../../context/RecommendationContext";
 import { recommendCrops } from "../../../lib/crop_matcher";
+import { fetchLatestPriceForecasts } from "../../../lib/priceForecasts";
 import { buildDataNote } from "../../../lib/profitSummary";
 
 export default function RecommendResult() {
@@ -16,22 +17,18 @@ export default function RecommendResult() {
   const { results, setResults, pestCrop, area } = useRecommendation();
 
   useEffect(() => {
-    // basis/season이 없으면 도매가로 매출을 계산하던 예전 결과다.
-    // 저장된 값을 그대로 쓰면 과대계상된 손익이 계속 노출되므로 다시 계산한다.
-    const isLegacyResult = results?.some(
-      (item) =>
-        !Number.isFinite(item?.profit?.yieldKg)
-        || !Number.isFinite(item?.profit?.priceWon)
-        || !item?.profit?.basis
-        || !item?.season
-    );
-    if (!isLegacyResult || !selectedRegion) return;
-    const site = {
-      ...selectedRegion.site,
-      recentCropHistory: pestCrop ? [{ crop: pestCrop, pestIssue: true }] : [],
-    };
-    setResults(recommendCrops(site, Number(area) || 1000));
-  }, [results, selectedRegion, pestCrop, area, setResults]);
+    if (!selectedRegion) return;
+    let active = true;
+    fetchLatestPriceForecasts().then((forecasts) => {
+      if (!active) return;
+      const site = {
+        ...selectedRegion.site,
+        recentCropHistory: pestCrop ? [{ crop: pestCrop, pestIssue: true }] : [],
+      };
+      setResults(recommendCrops(site, Number(area) || 1000, { forecasts }));
+    });
+    return () => { active = false; };
+  }, [selectedRegion, pestCrop, area, setResults]);
 
   const restartRecommendation = () => {
     setResults(null);

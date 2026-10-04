@@ -1,7 +1,7 @@
 import { fmtWon } from "./format";
 
 // evaluateCrop()이 이미 계산해둔 축 점수/경고/손익 수치를 규칙 기반으로 재해석해
-// 장점(pros)/단점(cons) 이유 목록을 만든다. 가격은 학습 모델 산출물을 우선 사용하고,
+// 장점(pros)/단점(cons) 이유 목록을 만든다. 가격 변동폭은 학습 모델 산출물을 사용하고,
 // 설명 문장은 계산 결과를 일관되게 보여주는 규칙 기반 텍스트다.
 function hasWarning(result, keyword) {
   return result.warnings.some((w) => w.includes(keyword));
@@ -76,7 +76,7 @@ export function buildDataNote(results) {
   }
   if (hasForecast) {
     lines.push(
-      "수익 범위는 KAMIS 도매가격·기상청 ASOS로 학습한 예측의 변동폭을 반영했어요. 가격이 자주 오르내리는 작물일수록 범위가 넓게 나와요."
+      "수익 범위는 KAMIS 도매가격 기반 예측의 변동폭을 반영했어요. 가격이 자주 오르내리는 작물일수록 범위가 넓게 나와요."
     );
   }
   lines.push("모든 수치는 참고용이며 실제 수익을 보장하지 않아요.");
