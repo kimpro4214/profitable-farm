@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import http.client
 import io
 import json
 import os
@@ -103,6 +104,28 @@ def load_env() -> dict[str, str]:
     return values
 
 
+def request_kamis_json(params: dict[str, str]) -> dict:
+    url = f"{KAMIS_URL}?{urllib.parse.urlencode(params)}"
+    max_attempts = 4
+    for attempt in range(1, max_attempts + 1):
+        try:
+            with urllib.request.urlopen(url, timeout=30) as response:
+                return json.loads(response.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            message = f"HTTP 오류 {exc.code}"
+            retryable = exc.code == 429 or 500 <= exc.code < 600
+        except (urllib.error.URLError, TimeoutError, ConnectionError,
+                http.client.RemoteDisconnected, http.client.IncompleteRead) as exc:
+            # 예외 원문/URL에는 인증키가 포함될 수 있어 종류만 기록한다.
+            message = f"연결 실패 ({type(exc).__name__})"
+            retryable = True
+        if not retryable or attempt == max_attempts:
+            raise RuntimeError(f"KAMIS {params['action']}: {message} ({attempt}회 시도)") from None
+        delay = 2 ** (attempt - 1)
+        print(f"KAMIS {params['action']}: {message}, {delay}초 후 재시도 ({attempt}/{max_attempts})", flush=True)
+        time.sleep(delay)
+
+
 def kamis_request(day: date, env: dict[str, str], category: str = "200") -> dict:
     params = {
         "action": "dailyPriceByCategoryList",
@@ -114,14 +137,7 @@ def kamis_request(day: date, env: dict[str, str], category: str = "200") -> dict
         "p_cert_id": env["KAMIS_CERT_ID"],
         "p_returntype": "json",
     }
-    url = f"{KAMIS_URL}?{urllib.parse.urlencode(params)}"
-    try:
-        with urllib.request.urlopen(url, timeout=30) as response:
-            return json.loads(response.read().decode("utf-8"))
-    except urllib.error.HTTPError as exc:
-        raise RuntimeError(f"KAMIS HTTP 오류 {exc.code}") from None
-    except urllib.error.URLError:
-        raise RuntimeError("KAMIS 연결 실패") from None
+    return request_kamis_json(params)
 
 
 def unwrap_items(payload: dict) -> list[dict]:
@@ -276,14 +292,8 @@ def fetch_period_prices(start: date, end: date) -> Path:
             "p_cert_id": env["KAMIS_CERT_ID"],
             "p_returntype": "json",
         }
-        url = f"{KAMIS_URL}?{urllib.parse.urlencode(params)}"
         try:
-            with urllib.request.urlopen(url, timeout=30) as response:
-                items = unwrap_items(json.loads(response.read().decode("utf-8")))
-        except urllib.error.HTTPError as exc:
-            raise RuntimeError(f"KAMIS 기간별 HTTP 오류 {exc.code}") from None
-        except urllib.error.URLError:
-            raise RuntimeError("KAMIS 기간별 API 연결 실패") from None
+            items = unwrap_items(request_kamis_json(params))
         except RuntimeError as exc:
             if "오류 코드 001" in str(exc):
                 return []
